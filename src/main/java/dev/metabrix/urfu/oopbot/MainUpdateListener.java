@@ -1,6 +1,7 @@
 package dev.metabrix.urfu.oopbot;
 
 import dev.metabrix.urfu.oopbot.telegram.UpdateListener;
+import dev.metabrix.urfu.oopbot.util.Emoji;
 import dev.metabrix.urfu.oopbot.util.LogUtils;
 import dev.metabrix.urfu.oopbot.util.command.CommandContext;
 import dev.metabrix.urfu.oopbot.util.command.CommandContextImpl;
@@ -57,11 +58,11 @@ public class MainUpdateListener implements UpdateListener {
                     case SUCCESS -> {}
                     case INTERNAL_ERROR -> this.application.getBot().execute(SendMessage.builder()
                         .chatId(message.getChatId())
-                        .text(":x: Во время выполнения команды произошла внутренняя ошибка, попробуйте ещё раз.")
+                        .text(Emoji.X + " Во время выполнения команды произошла внутренняя ошибка, попробуйте ещё раз.")
                         .build());
                     case INVALID_SYNTAX -> this.application.getBot().execute(SendMessage.builder()
                         .chatId(message.getChatId())
-                        .text(":x: Неверный синтаксис команды :(")
+                        .text(Emoji.X + " Неверный синтаксис команды :(")
                         .build());
                     case UNKNOWN_COMMAND -> this.respondUnknownCommand(message);
                 }
@@ -74,7 +75,7 @@ public class MainUpdateListener implements UpdateListener {
     private void respondUnknownCommand(@NotNull Message message) throws TelegramApiException {
         this.application.getBot().execute(SendMessage.builder()
             .chatId(message.getChatId())
-            .text(":x: Неизвестная команда :(")
+            .text(Emoji.X + " Неизвестная команда :(")
             .build());
     }
 }
