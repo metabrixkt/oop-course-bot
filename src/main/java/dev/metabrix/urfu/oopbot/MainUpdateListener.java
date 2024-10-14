@@ -24,7 +24,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 public class MainUpdateListener implements UpdateListener {
     private static final @NotNull Logger LOGGER = LogUtils.getLogger();
 
-    private static final @NotNull Pattern COMMAND_REGEX = Pattern.compile("^/[^/]+\\s.+$");
+    private static final @NotNull Pattern COMMAND_REGEX = Pattern.compile("^/[^/]+(?:\\s.+)?$");
 
     private final @NotNull BotApplication application;
 
