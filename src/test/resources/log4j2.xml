@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" shutdownHook="disable">
+    <Appenders>
+        <TerminalConsole name="TerminalConsole">
+            <PatternLayout>
+                <LoggerNamePatternSelector defaultPattern="%highlightError{[%d{HH:mm:ss} %level]: [%logger] %msg%n%xEx{full}}">
+                    <!-- Log root without prefix -->
+                    <PatternMatch key="" pattern="%highlightError{[%d{HH:mm:ss} %level]: %msg%n%xEx{full}}" />
+                </LoggerNamePatternSelector>
+            </PatternLayout>
+        </TerminalConsole>
+        <Async name="Async">
+            <AppenderRef ref="TerminalConsole" level="info"/>
+        </Async>
+    </Appenders>
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="Async"/>
+        </Root>
+    </Loggers>
+</Configuration>
