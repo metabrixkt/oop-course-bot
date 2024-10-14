@@ -32,4 +32,9 @@ public class CommandContextImpl implements CommandContext {
     public @NotNull CommandInput getCommandInput() {
         return this.input;
     }
+
+    @Override
+    public String toString() {
+        return "CommandContextImpl{application=%s, rawUpdate=%s, input=%s}".formatted(this.getApplication(), this.getRawUpdate(), this.getCommandInput());
+    }
 }

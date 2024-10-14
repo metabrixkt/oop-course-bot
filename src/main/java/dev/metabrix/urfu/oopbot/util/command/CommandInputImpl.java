@@ -51,4 +51,9 @@ public class CommandInputImpl implements CommandInput {
     public @NotNull CommandInput copy() {
         return new CommandInputImpl(this.rawInput, this.cursor);
     }
+
+    @Override
+    public @NotNull String toString() {
+        return "CommandInputImpl{rawInput='%s', cursor=%d}".formatted(this.getRawInput(), this.getCursor());
+    }
 }
