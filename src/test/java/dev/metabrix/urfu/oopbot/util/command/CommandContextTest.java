@@ -1,5 +1,7 @@
 package dev.metabrix.urfu.oopbot.util.command;
 
+import dev.metabrix.urfu.oopbot.BotApplication;
+import dev.metabrix.urfu.oopbot.BotConfiguration;
 import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -14,13 +16,23 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 public class CommandContextTest {
     @Test
+    public void testApplication() {
+        // Arrange
+        BotApplication expectedApplication = buildMockApplication();
+        CommandContext commandContext = new CommandContextImpl(expectedApplication, buildMockUpdate());
+
+        // Act
+        BotApplication result = commandContext.getApplication();
+
+        // Assert
+        assertEquals(result, expectedApplication);
+    }
+
+    @Test
     public void testRawUpdate() {
         // Arrange
-        Update expectedUpdate = new Update();
-        Message message = new Message();
-        message.setText("spaghetti monster");
-        expectedUpdate.setMessage(message);
-        CommandContext commandContext = new CommandContextImpl(expectedUpdate);
+        Update expectedUpdate = buildMockUpdate();
+        CommandContext commandContext = new CommandContextImpl(buildMockApplication(), expectedUpdate);
 
         // Act
         Update result = commandContext.getRawUpdate();
@@ -33,7 +45,7 @@ public class CommandContextTest {
     @MethodSource("sourceTestCommandInput")
     public void testCommandInput(@NotNull Update update, @NotNull String expectedInput) {
         // Arrange
-        CommandContext commandContext = new CommandContextImpl(update);
+        CommandContext commandContext = new CommandContextImpl(buildMockApplication(), update);
 
         // Act
         String result = commandContext.getCommandInput().getRawInput();
@@ -63,5 +75,20 @@ public class CommandContextTest {
             arguments(update2, "spaghetti monster"),
             arguments(update3, "/spaghetti monster")
         );
+    }
+
+    private static @NotNull BotApplication buildMockApplication() {
+        return new BotApplication(new BotConfiguration(
+            new BotConfiguration.BotInfo("username", "token"),
+            new BotConfiguration.Console(false)
+        ));
+    }
+
+    private static @NotNull Update buildMockUpdate() {
+        Update update = new Update();
+        Message message = new Message();
+        message.setText("/spaghetti monster");
+        update.setMessage(message);
+        return update;
     }
 }

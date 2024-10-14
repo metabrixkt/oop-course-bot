@@ -41,7 +41,7 @@ public class MainUpdateListener implements UpdateListener {
             return;
         }
 
-        CommandContext ctx = new CommandContextImpl(update);
+        CommandContext ctx = new CommandContextImpl(this.application, update);
         CommandInput input = ctx.getCommandInput();
 
         String commandLabel = input.readToken();

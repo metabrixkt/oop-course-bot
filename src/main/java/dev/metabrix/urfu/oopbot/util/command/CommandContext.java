@@ -1,5 +1,6 @@
 package dev.metabrix.urfu.oopbot.util.command;
 
+import dev.metabrix.urfu.oopbot.BotApplication;
 import org.jetbrains.annotations.NotNull;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -13,6 +14,15 @@ import org.telegram.telegrambots.meta.api.objects.User;
  * @author metabrix
  */
 public interface CommandContext {
+    /**
+     * Возвращает приложение бота.
+     *
+     * @return приложение
+     * @since 1.0.0
+     * @author metabrix
+     */
+    @NotNull BotApplication getApplication();
+
     /**
      * Возвращает объект события Telegram API.
      *
