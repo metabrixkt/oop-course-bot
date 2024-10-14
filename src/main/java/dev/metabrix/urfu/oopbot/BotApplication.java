@@ -3,7 +3,6 @@ package dev.metabrix.urfu.oopbot;
 import dev.metabrix.urfu.oopbot.console.Console;
 import dev.metabrix.urfu.oopbot.console.ConsoleHandler;
 import dev.metabrix.urfu.oopbot.telegram.TelegramBot;
-import dev.metabrix.urfu.oopbot.telegram.UpdateListener;
 import dev.metabrix.urfu.oopbot.util.LogUtils;
 import dev.metabrix.urfu.oopbot.util.Util;
 import java.util.Locale;
@@ -11,9 +10,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.BotSession;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
@@ -26,7 +22,7 @@ import static dev.metabrix.urfu.oopbot.util.Checks.checkState;
  * @since 1.0.0
  * @author metabrix
  */
-public class BotApplication implements UpdateListener {
+public class BotApplication {
     private static final @NotNull Logger LOGGER = LogUtils.getLogger();
 
     private final @NotNull Console console;
@@ -47,8 +43,19 @@ public class BotApplication implements UpdateListener {
         this.bot = new TelegramBot(
             configuration.botInfo().username(),
             configuration.botInfo().token(),
-            this
+            new MainUpdateListener(this)
         );
+    }
+
+    /**
+     * Возвращает бота (клиента Telegram API).
+     *
+     * @return бот
+     * @since 1.0.0
+     * @author metabrix
+     */
+    public @NotNull TelegramBot getBot() {
+        return this.bot;
     }
 
     /**
@@ -106,17 +113,5 @@ public class BotApplication implements UpdateListener {
      */
     public boolean isRunning() {
         return this.currentSession != null;
-    }
-
-    @Override
-    public void handleMessage(@NotNull Update update) throws TelegramApiException {
-        // simple echo for now
-
-        Message message = update.getMessage();
-
-        this.bot.execute(SendMessage.builder()
-            .chatId(message.getChatId())
-            .text(message.getText())
-            .build());
     }
 }
