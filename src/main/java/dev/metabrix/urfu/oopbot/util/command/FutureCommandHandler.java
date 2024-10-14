@@ -12,10 +12,10 @@ import org.jetbrains.annotations.NotNull;
 @FunctionalInterface
 public interface FutureCommandHandler extends CommandHandler {
     @Override
-    @NotNull CompletableFuture<@NotNull CommandExecutionResult> executeFuture(@NotNull CommandContext context);
+    @NotNull CompletableFuture<@NotNull CommandExecutionResult> executeFuture(@NotNull CommandContext ctx);
 
     @Override
-    default @NotNull CommandExecutionResult execute(@NotNull CommandContext context) {
-        return this.executeFuture(context).join();
+    default @NotNull CommandExecutionResult execute(@NotNull CommandContext ctx) {
+        return this.executeFuture(ctx).join();
     }
 }

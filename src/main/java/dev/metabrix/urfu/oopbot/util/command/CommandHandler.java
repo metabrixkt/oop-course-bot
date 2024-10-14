@@ -14,15 +14,15 @@ public interface CommandHandler {
     /**
      * Выполняет команду.
      *
-     * @param context контекст выполнения команды
+     * @param ctx контекст выполнения команды
      * @return результат
      * @since 1.0.0
      * @author metabrix
      */
-    default @NotNull CompletableFuture<@NotNull CommandExecutionResult> executeFuture(@NotNull CommandContext context) {
+    default @NotNull CompletableFuture<@NotNull CommandExecutionResult> executeFuture(@NotNull CommandContext ctx) {
         CompletableFuture<@NotNull CommandExecutionResult> future = new CompletableFuture<>();
         try {
-            future.complete(this.execute(context));
+            future.complete(this.execute(ctx));
         } catch (Throwable t) {
             future.completeExceptionally(t);
         }
@@ -32,10 +32,10 @@ public interface CommandHandler {
     /**
      * Выполняет команду, блокируя текущий поток до конца её выполнения.
      *
-     * @param context контекст выполнения команды
+     * @param ctx контекст выполнения команды
      * @return результат
      * @since 1.0.0
      * @author metabrix
      */
-    @NotNull CommandExecutionResult execute(@NotNull CommandContext context);
+    @NotNull CommandExecutionResult execute(@NotNull CommandContext ctx);
 }
