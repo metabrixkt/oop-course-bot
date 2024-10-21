@@ -1,5 +1,6 @@
 package dev.metabrix.urfu.oopbot;
 
+import dev.metabrix.urfu.oopbot.commands.StartCommand;
 import dev.metabrix.urfu.oopbot.util.command.CommandHandler;
 import java.util.HashMap;
 import java.util.Set;
@@ -14,6 +15,7 @@ import org.jetbrains.annotations.Nullable;
  * @author metabrix
  */
 public enum BotCommand {
+    START("start", new StartCommand(), "help"),
     ;
 
     private static final @NotNull HashMap<@NotNull String, @NotNull BotCommand> COMMANDS = new HashMap<>();

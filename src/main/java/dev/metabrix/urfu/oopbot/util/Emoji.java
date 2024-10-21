@@ -11,6 +11,8 @@ import org.jetbrains.annotations.NotNull;
 public enum Emoji {
     X("\u274c"),
     WHITE_CHECK_MARK("\u2705"),
+    NOTEBOOK("\ud83d\udcd4"),
+    EYES("\ud83d\udc40")
     ;
 
     private final @NotNull String unicode;
