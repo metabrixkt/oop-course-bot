@@ -3,10 +3,7 @@ package dev.metabrix.urfu.oopbot;
 import dev.metabrix.urfu.oopbot.telegram.UpdateListener;
 import dev.metabrix.urfu.oopbot.util.Emoji;
 import dev.metabrix.urfu.oopbot.util.LogUtils;
-import dev.metabrix.urfu.oopbot.util.command.CommandContext;
-import dev.metabrix.urfu.oopbot.util.command.CommandContextImpl;
-import dev.metabrix.urfu.oopbot.util.command.CommandHandler;
-import dev.metabrix.urfu.oopbot.util.command.CommandInput;
+import dev.metabrix.urfu.oopbot.util.command.*;
 import java.util.regex.Pattern;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -52,24 +49,29 @@ public class MainUpdateListener implements UpdateListener {
         }
 
         CommandHandler handler = command.getHandler();
-        handler.executeFuture(ctx).thenAcceptAsync(result -> {
-            try {
-                switch (result) {
-                    case SUCCESS -> {}
-                    case INTERNAL_ERROR -> this.application.getBot().execute(SendMessage.builder()
-                        .chatId(message.getChatId())
-                        .text(Emoji.X + " Во время выполнения команды произошла внутренняя ошибка, попробуйте ещё раз.")
-                        .build());
-                    case INVALID_SYNTAX -> this.application.getBot().execute(SendMessage.builder()
-                        .chatId(message.getChatId())
-                        .text(Emoji.X + " Неверный синтаксис команды :(")
-                        .build());
-                    case UNKNOWN_COMMAND -> this.respondUnknownCommand(message);
+        handler.executeFuture(ctx)
+            .exceptionally(throwable -> {
+                LOGGER.error("Failed to process command: {}", ctx.getCommandInput().getRawInput(), throwable);
+                return CommandExecutionResult.INTERNAL_ERROR;
+            })
+            .thenAcceptAsync(result -> {
+                try {
+                    switch (result) {
+                        case SUCCESS -> {}
+                        case INTERNAL_ERROR -> this.application.getBot().execute(SendMessage.builder()
+                            .chatId(message.getChatId())
+                            .text(Emoji.X + " Во время выполнения команды произошла внутренняя ошибка, попробуйте ещё раз.")
+                            .build());
+                        case INVALID_SYNTAX -> this.application.getBot().execute(SendMessage.builder()
+                            .chatId(message.getChatId())
+                            .text(Emoji.X + " Неверный синтаксис команды :(")
+                            .build());
+                        case UNKNOWN_COMMAND -> this.respondUnknownCommand(message);
+                    }
+                } catch (TelegramApiException e) {
+                    LOGGER.error("Failed to process command execution result", e);
                 }
-            } catch (TelegramApiException e) {
-                LOGGER.error("Failed to process command execution result", e);
-            }
-        });
+            });
     }
 
     private void respondUnknownCommand(@NotNull Message message) throws TelegramApiException {
