@@ -22,7 +22,7 @@ public class StartCommand implements CommandHandler {
                 .parseMode("html")
                 .text(
                     """
-                    %s <b>Трекер задач</b>
+                    %s
                     
                     С помощью этого бота можно удобно отслеживать задачи, дедлайны, а также настроить уведомления.
                     
@@ -30,7 +30,7 @@ public class StartCommand implements CommandHandler {
                     
                     Бот находится в разработке %s
                     """.formatted(
-                        Emoji.NOTEBOOK,
+                        ctx.getChat().isUserChat() ? Emoji.NOTEBOOK + " <b>Трекер задач</b>" : "",
                         Arrays.stream(BotCommand.values())
                             .map(botCommand -> "/" + botCommand.getName())
                             .collect(Collectors.joining(", ")),
