@@ -31,10 +31,13 @@ public class MainUpdateListener implements UpdateListener {
 
     @Override
     public void handleMessage(@NotNull Update update) throws TelegramApiException {
+        // ignore forwarded messages
+        if (update.getMessage().getForwardSenderName() != null) return;
+
         Message message = update.getMessage();
         String text = message.getText();
         if (text == null || !COMMAND_REGEX.matcher(text).matches()) {
-            this.respondUnknownCommand(message);
+            if (message.getChat().isUserChat()) this.respondUnknownCommand(message);
             return;
         }
 
