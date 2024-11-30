@@ -27,9 +27,13 @@ public class ConsoleHandler {
         CommandInput input = CommandInput.of(rawInput);
         if (input.isEmpty()) return;
 
-        switch (input.readToken()) {
-            case "stop" -> application.stop();
-            default -> LOGGER.info("Unknown command: {}", rawInput);
+        try {
+            switch (input.readToken()) {
+                case "stop" -> application.stop();
+                default -> LOGGER.info("Unknown command: {}", rawInput);
+            }
+        } catch (Exception ex) {
+            LOGGER.error("Failed to execute console command: {}", input, ex);
         }
     }
 }

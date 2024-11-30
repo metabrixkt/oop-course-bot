@@ -13,7 +13,6 @@ import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 public class Main {
     private static final @NotNull Logger LOGGER = LoggerFactory.getLogger("");
@@ -31,12 +30,18 @@ public class Main {
             BotApplication application = new BotApplication(config);
             application.start();
 
-            Runtime.getRuntime().addShutdownHook(new Thread(application::stop));
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                try {
+                    application.stop();
+                } catch (Exception ex) {
+                    LOGGER.error("Failed to stop the bot", ex);
+                }
+            }));
 
             long elapsedMillis = Util.monotonicMillis() - startTime;
             LOGGER.info("Done ({}s)!", String.format(Locale.ROOT, "%.3f", elapsedMillis / 1000.0));
-        } catch (TelegramApiException e) {
-            LOGGER.error("Failed to start the bot", e);
+        } catch (Throwable t) {
+            LOGGER.error("Failed to start the bot", t);
         }
     }
 
