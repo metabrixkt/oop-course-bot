@@ -47,6 +47,15 @@ public interface DataStorage extends AutoCloseable {
     @NotNull TaskStorage tasks();
 
     /**
+     * Возвращает хранилище состояний диалогов.
+     *
+     * @return хранилище состояний диалогов
+     * @since 1.1.0
+     * @author metabrix
+     */
+    @NotNull DialogStateStorage dialogStates();
+
+    /**
      * Проверяет, закрыто ли хранилище.
      *
      * @return {@code true}, если хранилище закрыто, иначе {@code false}

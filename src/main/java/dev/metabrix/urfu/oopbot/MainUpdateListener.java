@@ -1,5 +1,8 @@
 package dev.metabrix.urfu.oopbot;
 
+import dev.metabrix.urfu.oopbot.storage.model.Chat;
+import dev.metabrix.urfu.oopbot.storage.model.User;
+import dev.metabrix.urfu.oopbot.storage.model.dialog.DialogState;
 import dev.metabrix.urfu.oopbot.telegram.MessageUpdateContext;
 import dev.metabrix.urfu.oopbot.telegram.UpdateListener;
 import dev.metabrix.urfu.oopbot.util.Emoji;
@@ -40,12 +43,22 @@ public class MainUpdateListener implements UpdateListener {
         Message message = update.getMessage();
         String text = message.getText();
         if (text == null || !COMMAND_REGEX.matcher(text).matches()) {
-            if (message.getChat().isUserChat()) this.respondUnknownCommand(message);
+            DialogState dialogState = updateContext.getDialogState();
+            if (dialogState == null) {
+                if (message.getChat().isUserChat()) {
+                    this.respondUnknownCommand(message);
+                }
+            } else {
+                dialogState.handleMessage(this.application, update);
+            }
             return;
         }
 
-        updateContext.createOrUpdateUser();
-        updateContext.createChatIfNotExists();
+        User user = updateContext.createOrUpdateUser();
+        Chat chat = updateContext.createChatIfNotExists();
+
+        // remove any existing dialog state - we're processing commands now
+        this.application.getStorage().dialogStates().delete(user.id(), chat.id());
 
         CommandContext ctx = new CommandContextImpl(this.application, update);
         CommandInput input = ctx.getCommandInput();

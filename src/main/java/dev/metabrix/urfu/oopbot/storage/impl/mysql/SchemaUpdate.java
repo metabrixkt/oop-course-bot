@@ -95,6 +95,31 @@ enum SchemaUpdate {
             s.executeUpdate();
         }
     }),
+    INTRODUCE_DIALOG_STATES((connection, tables, logger) -> {
+        logger.info("Creating table {}", tables.dialogStates());
+        try (PreparedStatement s = connection.prepareStatement(
+            "CREATE TABLE IF NOT EXISTS " + tables.dialogStates() + " (" +
+                "user_id INT NOT NULL, " +
+                "chat_id INT NOT NULL, " +
+                "type VARCHAR(64) NOT NULL, " +
+                "data JSON NOT NULL, " +
+                "PRIMARY KEY (user_id, chat_id), " +
+                "INDEX (type), " +
+                "CONSTRAINT fk_dialog_states_user_id__id FOREIGN KEY (user_id) REFERENCES " + tables.users() + " (id) ON DELETE RESTRICT ON UPDATE RESTRICT, " +
+                "CONSTRAINT fk_dialog_states_chat_id__id FOREIGN KEY (chat_id) REFERENCES " + tables.chats() + " (id) ON DELETE RESTRICT ON UPDATE RESTRICT" +
+                ")"
+        )) {
+            s.executeUpdate();
+        }
+
+        try (PreparedStatement s = connection.prepareStatement(
+            "INSERT INTO " + tables.version() + " (version, time) VALUES (?, ?)"
+        )) {
+            s.setInt(1, 1);
+            s.setTimestamp(2, Timestamp.from(Instant.now()));
+            s.executeUpdate();
+        }
+    })
     ;
 
     private static final @NotNull Logger LOGGER = LogUtils.getLogger();
