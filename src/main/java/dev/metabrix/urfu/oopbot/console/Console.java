@@ -50,6 +50,10 @@ public class Console extends SimpleTerminalConsole {
 
     @Override
     protected void shutdown() {
-        this.application.stop();
+        try {
+            this.application.stop();
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
     }
 }

@@ -2,6 +2,7 @@ package dev.metabrix.urfu.oopbot.util.command;
 
 import dev.metabrix.urfu.oopbot.BotApplication;
 import dev.metabrix.urfu.oopbot.BotConfiguration;
+import java.util.HashMap;
 import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -80,7 +81,8 @@ public class CommandContextTest {
     private static @NotNull BotApplication buildMockApplication() {
         return new BotApplication(new BotConfiguration(
             new BotConfiguration.BotInfo("username", "token"),
-            new BotConfiguration.Console(false)
+            new BotConfiguration.Console(false),
+            new BotConfiguration.DataStorage(BotConfiguration.DataStorage.Type.MYSQL, new HashMap<>())
         ));
     }
 

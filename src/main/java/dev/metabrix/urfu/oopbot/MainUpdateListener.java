@@ -1,15 +1,22 @@
 package dev.metabrix.urfu.oopbot;
 
+import dev.metabrix.urfu.oopbot.storage.ChatStorage;
+import dev.metabrix.urfu.oopbot.storage.UserStorage;
 import dev.metabrix.urfu.oopbot.telegram.UpdateListener;
 import dev.metabrix.urfu.oopbot.util.Emoji;
 import dev.metabrix.urfu.oopbot.util.LogUtils;
 import dev.metabrix.urfu.oopbot.util.command.*;
+import dev.metabrix.urfu.oopbot.util.exception.DuplicateObjectException;
+import java.time.Instant;
+import java.util.Objects;
 import java.util.regex.Pattern;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 /**
@@ -51,6 +58,9 @@ public class MainUpdateListener implements UpdateListener {
             return;
         }
 
+        dev.metabrix.urfu.oopbot.storage.model.User user = this.createOrUpdateUser(message.getFrom());
+        this.createChatIfNotExists(user, message.getChat());
+
         CommandHandler handler = command.getHandler();
         handler.executeFuture(ctx)
             .exceptionally(throwable -> {
@@ -75,6 +85,61 @@ public class MainUpdateListener implements UpdateListener {
                     LOGGER.error("Failed to process command execution result", e);
                 }
             });
+    }
+
+    private @NotNull dev.metabrix.urfu.oopbot.storage.model.User createOrUpdateUser(@NotNull User telegramUser) {
+        UserStorage users = this.application.getStorage().users();
+
+        dev.metabrix.urfu.oopbot.storage.model.User user = users.getByTelegramId(telegramUser.getId());
+        if (user != null) {
+            String newUsername = telegramUser.getUserName();
+            if (Objects.equals(user.telegramUsername(), newUsername)) return user;
+
+            users.updateTelegramUsername(user.id(), newUsername);
+            return new dev.metabrix.urfu.oopbot.storage.model.User(
+                user.id(),
+                user.telegramId(),
+                newUsername,
+                user.joinedAt(),
+                Instant.now()
+            );
+        }
+
+        try {
+            return users.create(telegramUser.getId(), telegramUser.getUserName());
+        } catch (DuplicateObjectException e) {
+            // got a race condition: the user was created on our way here
+            user = users.getByTelegramId(telegramUser.getId());
+            if (user != null) {
+                String newUsername = telegramUser.getUserName();
+                if (Objects.equals(user.telegramUsername(), newUsername)) return user;
+
+                users.updateTelegramUsername(user.id(), newUsername);
+                return new dev.metabrix.urfu.oopbot.storage.model.User(
+                    user.id(),
+                    user.telegramId(),
+                    newUsername,
+                    user.joinedAt(),
+                    Instant.now()
+                );
+            } else {
+                // woah, what? that's not a race condition (probably)
+                throw new IllegalStateException(
+                    "User creation failed with DuplicateObjectException, but the user for Telegram ID " + telegramUser.getId() + " doesn't exist",
+                    e
+                );
+            }
+        }
+    }
+
+    private void createChatIfNotExists(@NotNull dev.metabrix.urfu.oopbot.storage.model.User user, @NotNull Chat telegramChat) {
+        ChatStorage chats = this.application.getStorage().chats();
+        if (chats.getByTelegramId(telegramChat.getId()) != null) return;
+
+        try {
+            chats.create(telegramChat.getId(), user.id());
+        } catch (DuplicateObjectException ignored) {
+        }
     }
 
     private void respondUnknownCommand(@NotNull Message message) throws TelegramApiException {

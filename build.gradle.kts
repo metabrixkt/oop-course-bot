@@ -25,6 +25,8 @@ dependencies {
 
     implementation("org.telegram:telegrambots:6.9.7.1")
 
+    implementation("com.mysql:mysql-connector-j:9.1.0")
+
     testImplementation(platform("org.junit:junit-bom:5.11.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")

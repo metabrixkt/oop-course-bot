@@ -17,7 +17,7 @@ public class StartCommand implements CommandHandler {
     public @NotNull CommandExecutionResult execute(@NotNull CommandContext ctx) {
         try {
             ctx.getApplication().getBot().execute(SendMessage.builder()
-                .chatId(ctx.getChat().getId())
+                .chatId(ctx.getTelegramChat().getId())
                 .parseMode(ParseMode.MARKDOWNV2)
                 .text(
                     """
@@ -29,7 +29,7 @@ public class StartCommand implements CommandHandler {
                     
                     Бот находится в разработке %s
                     """.formatted(
-                        ctx.getChat().isUserChat() ? Emoji.NOTEBOOK + " *Трекер задач*" : "",
+                        ctx.getTelegramChat().isUserChat() ? Emoji.NOTEBOOK + " *Трекер задач*" : "",
                         Arrays.stream(BotCommand.values())
                             .map(botCommand -> "/" + botCommand.getName())
                             .collect(Collectors.joining(", ")),
