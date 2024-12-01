@@ -22,7 +22,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 public class MainUpdateListener implements UpdateListener {
     private static final @NotNull Logger LOGGER = LogUtils.getLogger();
 
-    private static final @NotNull Pattern COMMAND_REGEX = Pattern.compile("^/[^/]+(?:\\s.+)?$");
+    private static final @NotNull Pattern COMMAND_REGEX = Pattern.compile("^/[^/]+(?:@[A-Za-z0-9_]+)?(?:\\s.+)?$");
 
     private final @NotNull BotApplication application;
 
@@ -51,6 +51,16 @@ public class MainUpdateListener implements UpdateListener {
         CommandInput input = ctx.getCommandInput();
 
         String commandLabel = input.readToken();
+        String[] tagSplitParts = commandLabel.split("@");
+        if (tagSplitParts.length > 1) {
+            if (tagSplitParts[tagSplitParts.length - 1].equalsIgnoreCase(this.application.getBot().getBotUsername())) {
+                commandLabel = commandLabel.substring(0, commandLabel.length() - this.application.getBot().getBotUsername().length() - 1);
+            } else {
+                // command name has a bot tag, and it's not us
+                return;
+            }
+        }
+
         BotCommand command = BotCommand.byName(commandLabel);
         if (command == null) {
             this.respondUnknownCommand(message);
