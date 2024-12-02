@@ -5,6 +5,7 @@ import dev.metabrix.urfu.oopbot.storage.ChatStorage;
 import dev.metabrix.urfu.oopbot.storage.UserStorage;
 import dev.metabrix.urfu.oopbot.storage.model.Chat;
 import dev.metabrix.urfu.oopbot.storage.model.User;
+import dev.metabrix.urfu.oopbot.storage.model.dialog.DialogState;
 import dev.metabrix.urfu.oopbot.util.exception.DuplicateObjectException;
 import java.time.Instant;
 import java.util.Objects;
@@ -28,6 +29,7 @@ public final class MessageUpdateContext {
 
     private @Nullable User cachedUser;
     private @Nullable Chat cachedChat;
+    private @Nullable DialogState cachedDialogState;
 
     /**
      * Создаёт новый контекст.
@@ -220,5 +222,26 @@ public final class MessageUpdateContext {
                 );
             }
         }
+    }
+
+    /**
+     * Возвращает состояние диалога.
+     *
+     * @return состояние диалога или {@code null}, если его нет
+     * @since 1.1.0
+     * @author metabrix
+     */
+    public @Nullable DialogState getDialogState() {
+        if (this.cachedDialogState != null) return this.cachedDialogState;
+
+        User user = this.getAndUpdateUserIfExists();
+        if (user == null) return null;
+
+        Chat chat = this.getChatIfExists();
+        if (chat == null) return null;
+
+        DialogState dialogState = this.application.getStorage().dialogStates().get(user.id(), chat.id());
+        this.cachedDialogState = dialogState;
+        return dialogState;
     }
 }

@@ -1,10 +1,7 @@
 package dev.metabrix.urfu.oopbot.storage.impl.mysql;
 
 import dev.metabrix.urfu.oopbot.BotConfiguration;
-import dev.metabrix.urfu.oopbot.storage.ChatStorage;
-import dev.metabrix.urfu.oopbot.storage.DataStorage;
-import dev.metabrix.urfu.oopbot.storage.TaskStorage;
-import dev.metabrix.urfu.oopbot.storage.UserStorage;
+import dev.metabrix.urfu.oopbot.storage.*;
 import dev.metabrix.urfu.oopbot.storage.impl.sql.SQLConnectionPool;
 import dev.metabrix.urfu.oopbot.util.LogUtils;
 import java.sql.PreparedStatement;
@@ -24,6 +21,7 @@ public class MySQLDataStorage implements DataStorage {
     private final @NotNull UserStorage users;
     private final @NotNull ChatStorage chats;
     private final @NotNull TaskStorage tasks;
+    private final @NotNull DialogStateStorage dialogStates;
 
     public MySQLDataStorage(@NotNull BotConfiguration.DataStorage.MySQLConfiguration configuration) throws Exception {
         this.tables = new Tables(configuration.tablePrefix());
@@ -33,6 +31,7 @@ public class MySQLDataStorage implements DataStorage {
         this.users = new MySQLUserStorage(this.pool, this.tables);
         this.chats = new MySQLChatStorage(this.pool, this.tables);
         this.tasks = new MySQLTaskStorage(this.pool, this.tables);
+        this.dialogStates = new MySQLDialogStateStorage(this.pool, this.tables);
     }
 
     private void updateSchema() throws Exception {
@@ -105,6 +104,12 @@ public class MySQLDataStorage implements DataStorage {
     public @NotNull TaskStorage tasks() {
         checkNotClosed();
         return this.tasks;
+    }
+
+    @Override
+    public @NotNull DialogStateStorage dialogStates() {
+        checkNotClosed();
+        return this.dialogStates;
     }
 
     @Override
