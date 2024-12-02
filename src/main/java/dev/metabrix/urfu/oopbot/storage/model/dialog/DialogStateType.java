@@ -5,6 +5,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
@@ -53,6 +54,12 @@ public enum DialogStateType {
      */
     public @NotNull DialogState deserializeFromJson(@NotNull JSONObject json) {
         return this.jsonDeserializer.apply(json);
+    }
+
+    @Override
+    @Contract(pure = true)
+    public @NotNull String toString() {
+        return this.getId();
     }
 
     /**
