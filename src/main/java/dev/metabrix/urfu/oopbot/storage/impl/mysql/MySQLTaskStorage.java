@@ -1,5 +1,6 @@
 package dev.metabrix.urfu.oopbot.storage.impl.mysql;
 
+import dev.metabrix.urfu.oopbot.storage.TaskCommentsStorage;
 import dev.metabrix.urfu.oopbot.storage.TaskStorage;
 import dev.metabrix.urfu.oopbot.storage.impl.sql.SQLConnectionPool;
 import dev.metabrix.urfu.oopbot.storage.model.Task;
@@ -15,13 +16,25 @@ import java.util.Locale;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import static dev.metabrix.urfu.oopbot.util.Checks.checkState;
+
 public class MySQLTaskStorage implements TaskStorage {
     private final @NotNull SQLConnectionPool pool;
     private final @NotNull Tables tables;
 
+    private final @NotNull TaskCommentsStorage comments;
+
     MySQLTaskStorage(@NotNull SQLConnectionPool pool, @NotNull Tables tables) {
         this.pool = pool;
         this.tables = tables;
+
+        this.comments = new MySQLTaskCommentsStorage(pool, tables);
+    }
+
+    @Override
+    public @NotNull TaskCommentsStorage comments() {
+        checkState(!this.pool.isClosed(), "Storage is closed");
+        return this.comments;
     }
 
     @Override
