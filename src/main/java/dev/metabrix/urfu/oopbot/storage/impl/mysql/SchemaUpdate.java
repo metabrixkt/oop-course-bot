@@ -119,7 +119,36 @@ enum SchemaUpdate {
             s.setTimestamp(2, Timestamp.from(Instant.now()));
             s.executeUpdate();
         }
-    })
+    }),
+    ADD_TASK_COMMENTS((connection, tables, logger) -> {
+        logger.info("Creating table {}", tables.tasksComments());
+        try (PreparedStatement s = connection.prepareStatement(
+            "CREATE TABLE IF NOT EXISTS " + tables.tasksComments() + " (" +
+                "id INT NOT NULL AUTO_INCREMENT, " +
+                "task_id INT NOT NULL, " +
+                "author_id INT NOT NULL, " +
+                "content TEXT NOT NULL, " +
+                "posted_at TIMESTAMP NOT NULL, " +
+                "updated_at TIMESTAMP DEFAULT NULL, " +
+                "PRIMARY KEY (id), " +
+                "INDEX (task_id), " +
+                "INDEX (author_id), " +
+                "INDEX (posted_at), " +
+                "CONSTRAINT fk_tasks_comments_task_id__id FOREIGN KEY (task_id) REFERENCES " + tables.tasks() + " (id) ON DELETE RESTRICT ON UPDATE RESTRICT, " +
+                "CONSTRAINT fk_tasks_comments_author_id__id FOREIGN KEY (author_id) REFERENCES " + tables.users() + " (id) ON DELETE RESTRICT ON UPDATE RESTRICT" +
+                ")"
+        )) {
+            s.executeUpdate();
+        }
+
+        try (PreparedStatement s = connection.prepareStatement(
+            "INSERT INTO " + tables.version() + " (version, time) VALUES (?, ?)"
+        )) {
+            s.setInt(1, 2);
+            s.setTimestamp(2, Timestamp.from(Instant.now()));
+            s.executeUpdate();
+        }
+    }),
     ;
 
     private static final @NotNull Logger LOGGER = LogUtils.getLogger();
