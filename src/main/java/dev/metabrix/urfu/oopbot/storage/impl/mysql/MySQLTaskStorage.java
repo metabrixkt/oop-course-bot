@@ -166,13 +166,15 @@ public class MySQLTaskStorage implements TaskStorage {
     }
 
     @Override
-    public void updateName(int id, @NotNull String newName) {
+    public void updateName(int id, @NotNull String newName, int updatedById) {
         Task.validateName(newName);
         try (PreparedStatement s = this.pool.getConnection().prepareStatement(
-            "UPDATE " + this.tables.tasks() + " SET name = ? WHERE id = ?"
+            "UPDATE " + this.tables.tasks() + " SET name = ?, updated_by_id = ?, updated_at = ? WHERE id = ?"
         )) {
             s.setString(1, newName);
-            s.setInt(2, id);
+            s.setInt(2, updatedById);
+            s.setTimestamp(3, Timestamp.from(Instant.now()));
+            s.setInt(4, id);
             s.executeUpdate();
         } catch (SQLException ex) {
             throw new StorageException(ex);
@@ -180,13 +182,15 @@ public class MySQLTaskStorage implements TaskStorage {
     }
 
     @Override
-    public void updateDescription(int id, @Nullable String newDescription) {
+    public void updateDescription(int id, @Nullable String newDescription, int updatedById) {
         Task.validateDescription(newDescription);
         try (PreparedStatement s = this.pool.getConnection().prepareStatement(
-            "UPDATE " + this.tables.tasks() + " SET description = ? WHERE id = ?"
+            "UPDATE " + this.tables.tasks() + " SET description = ?, updated_by_id = ?, updated_at = ? WHERE id = ?"
         )) {
             s.setString(1, newDescription);
-            s.setInt(2, id);
+            s.setInt(2, updatedById);
+            s.setTimestamp(3, Timestamp.from(Instant.now()));
+            s.setInt(4, id);
             s.executeUpdate();
         } catch (SQLException ex) {
             throw new StorageException(ex);

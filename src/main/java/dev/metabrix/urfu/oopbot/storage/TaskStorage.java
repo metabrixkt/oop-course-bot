@@ -107,20 +107,22 @@ public interface TaskStorage {
      *
      * @param id внутренний ID задачи
      * @param newName новое название задачи
+     * @param updatedById внутренний ID пользователя, который изменяет название
      * @since 1.1.0
      * @author metabrix
      */
-    void updateName(int id, @NotNull String newName);
+    void updateName(int id, @NotNull String newName, int updatedById);
 
     /**
      * Изменяет описание задачи.
      *
      * @param id внутренний ID задачи
      * @param newDescription новое описание задачи
+     * @param updatedById внутренний ID пользователя, который изменяет описание
      * @since 1.1.0
      * @author metabrix
      */
-    void updateDescription(int id, @Nullable String newDescription);
+    void updateDescription(int id, @Nullable String newDescription, int updatedById);
 
     /**
      * Удаляет задачу по ID.
