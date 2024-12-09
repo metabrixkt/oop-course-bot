@@ -3,6 +3,7 @@ package dev.metabrix.urfu.oopbot.storage.model.dialog;
 import dev.metabrix.urfu.oopbot.interaction.MessageInteraction;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 /**
  * Состояние диалога.
@@ -18,7 +19,7 @@ public interface DialogState {
      * @since 1.1.0
      * @author metabrix
      */
-    void handleMessage(@NotNull MessageInteraction interaction);
+    void handleMessage(@NotNull MessageInteraction interaction) throws TelegramApiException;
 
     /**
      * Возвращает тип состояния диалога.
