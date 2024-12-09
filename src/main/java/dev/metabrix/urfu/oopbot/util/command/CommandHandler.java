@@ -2,6 +2,7 @@ package dev.metabrix.urfu.oopbot.util.command;
 
 import java.util.concurrent.CompletableFuture;
 import org.jetbrains.annotations.NotNull;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 /**
  * Обработчик команды.
@@ -37,5 +38,5 @@ public interface CommandHandler {
      * @since 1.0.0
      * @author metabrix
      */
-    @NotNull CommandExecutionResult execute(@NotNull CommandContext ctx);
+    @NotNull CommandExecutionResult execute(@NotNull CommandContext ctx) throws TelegramApiException;
 }
