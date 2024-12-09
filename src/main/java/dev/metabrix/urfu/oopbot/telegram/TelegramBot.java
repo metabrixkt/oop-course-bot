@@ -1,5 +1,7 @@
 package dev.metabrix.urfu.oopbot.telegram;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.metabrix.urfu.oopbot.BotApplication;
 import dev.metabrix.urfu.oopbot.interaction.impl.CallbackQueryInteractionImpl;
 import dev.metabrix.urfu.oopbot.interaction.impl.MessageInteractionImpl;
@@ -20,6 +22,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
  */
 public class TelegramBot extends TelegramLongPollingBot {
     private static final @NotNull Logger LOGGER = LogUtils.getLogger();
+    private static final @NotNull ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private final @NotNull BotApplication application;
     private final @NotNull String username;
@@ -94,8 +97,14 @@ public class TelegramBot extends TelegramLongPollingBot {
 //                this.updateListener.handleRemovedChatBoost(new SimpleInteraction(this.application, update));
 //            }
             else LOGGER.warn("Received unknown update: {}", update);
-        } catch (TelegramApiException e) {
-            LOGGER.error("Failed to handle update ID {}", update.getUpdateId());
+        } catch (TelegramApiException telegramException) {
+            try {
+                LOGGER.error("Failed to handle update: {}", OBJECT_MAPPER.writeValueAsString(update), telegramException);
+            } catch (JsonProcessingException jsonException) {
+                RuntimeException exception = new RuntimeException("Failed to handle update: " + update, telegramException);
+                exception.addSuppressed(jsonException);
+                throw exception;
+            }
         }
     }
 }
