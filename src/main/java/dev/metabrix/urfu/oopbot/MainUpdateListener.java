@@ -9,6 +9,7 @@ import dev.metabrix.urfu.oopbot.telegram.UpdateListener;
 import dev.metabrix.urfu.oopbot.util.Emoji;
 import dev.metabrix.urfu.oopbot.util.LogUtils;
 import dev.metabrix.urfu.oopbot.util.command.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -82,7 +83,13 @@ public class MainUpdateListener implements UpdateListener {
 
 
         CommandHandler handler = command.getHandler();
-        handler.executeFuture(ctx)
+        CompletableFuture<CommandExecutionResult> future;
+        try {
+            future = handler.executeFuture(ctx);
+        } catch (Exception ex) {
+            future = CompletableFuture.failedFuture(ex);
+        }
+        future
             .exceptionally(throwable -> {
                 LOGGER.error("Failed to process command: {}", ctx.getCommandInput().getRawInput(), throwable);
                 return CommandExecutionResult.INTERNAL_ERROR;
