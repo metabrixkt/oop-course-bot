@@ -27,7 +27,7 @@ public class DialogStateTypeTest {
         JSONObject actualJson = state.toJson();
 
         // Assert
-        assertEquals(expectedJson, actualJson);
+        assertEquals(expectedJson.toMap(), actualJson.toMap());
     }
 
     private static @NotNull Stream<@NotNull Arguments> sourceTestJsonSerialization() {
