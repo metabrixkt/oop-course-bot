@@ -1,5 +1,6 @@
 package dev.metabrix.urfu.oopbot;
 
+import dev.metabrix.urfu.oopbot.interaction.MessageInteraction;
 import dev.metabrix.urfu.oopbot.storage.model.Chat;
 import dev.metabrix.urfu.oopbot.storage.model.User;
 import dev.metabrix.urfu.oopbot.storage.model.dialog.DialogState;
@@ -13,7 +14,6 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 /**
@@ -34,22 +34,22 @@ public class MainUpdateListener implements UpdateListener {
     }
 
     @Override
-    public void handleMessage(@NotNull Update update) throws TelegramApiException {
+    public void handleMessage(@NotNull MessageInteraction interaction) throws TelegramApiException {
         // ignore forwarded messages
-        if (update.getMessage().getForwardSenderName() != null) return;
+        if (interaction.getMessage().getForwardSenderName() != null) return;
 
-        MessageUpdateContext updateContext = new MessageUpdateContext(this.application, update);
+        MessageUpdateContext updateContext = new MessageUpdateContext(interaction);
 
-        Message message = update.getMessage();
+        Message message = interaction.getMessage();
         String text = message.getText();
         if (text == null || !COMMAND_REGEX.matcher(text).matches()) {
             DialogState dialogState = updateContext.getDialogState();
             if (dialogState == null) {
                 if (message.getChat().isUserChat()) {
-                    this.respondUnknownCommand(message);
+                    this.respondUnknownCommand(interaction);
                 }
             } else {
-                dialogState.handleMessage(this.application, update);
+                dialogState.handleMessage(interaction);
             }
             return;
         }
@@ -60,7 +60,7 @@ public class MainUpdateListener implements UpdateListener {
         // remove any existing dialog state - we're processing commands now
         this.application.getStorage().dialogStates().delete(user.id(), chat.id());
 
-        CommandContext ctx = new CommandContextImpl(this.application, update);
+        CommandContext ctx = new CommandContextImpl(interaction);
         CommandInput input = ctx.getCommandInput();
 
         String commandLabel = input.readToken();
@@ -76,7 +76,7 @@ public class MainUpdateListener implements UpdateListener {
 
         BotCommand command = BotCommand.byName(commandLabel);
         if (command == null) {
-            this.respondUnknownCommand(message);
+            this.respondUnknownCommand(interaction);
             return;
         }
 
@@ -91,15 +91,15 @@ public class MainUpdateListener implements UpdateListener {
                 try {
                     switch (result) {
                         case SUCCESS -> {}
-                        case INTERNAL_ERROR -> this.application.getBot().execute(SendMessage.builder()
+                        case INTERNAL_ERROR -> interaction.execute(SendMessage.builder()
                             .chatId(message.getChatId())
                             .text(Emoji.X + " Во время выполнения команды произошла внутренняя ошибка, попробуйте ещё раз.")
                             .build());
-                        case INVALID_SYNTAX -> this.application.getBot().execute(SendMessage.builder()
+                        case INVALID_SYNTAX -> interaction.execute(SendMessage.builder()
                             .chatId(message.getChatId())
                             .text(Emoji.X + " Неверный синтаксис команды :(")
                             .build());
-                        case UNKNOWN_COMMAND -> this.respondUnknownCommand(message);
+                        case UNKNOWN_COMMAND -> this.respondUnknownCommand(interaction);
                     }
                 } catch (TelegramApiException e) {
                     LOGGER.error("Failed to process command execution result", e);
@@ -107,9 +107,9 @@ public class MainUpdateListener implements UpdateListener {
             });
     }
 
-    private void respondUnknownCommand(@NotNull Message message) throws TelegramApiException {
-        this.application.getBot().execute(SendMessage.builder()
-            .chatId(message.getChatId())
+    private void respondUnknownCommand(@NotNull MessageInteraction interaction) throws TelegramApiException {
+        interaction.execute(SendMessage.builder()
+            .chatId(interaction.getTelegramChat().getId())
             .text(Emoji.X + " Неизвестная команда :(")
             .build());
     }

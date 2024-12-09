@@ -1,6 +1,6 @@
 package dev.metabrix.urfu.oopbot.telegram;
 
-import dev.metabrix.urfu.oopbot.BotApplication;
+import dev.metabrix.urfu.oopbot.interaction.MessageInteraction;
 import dev.metabrix.urfu.oopbot.storage.ChatStorage;
 import dev.metabrix.urfu.oopbot.storage.UserStorage;
 import dev.metabrix.urfu.oopbot.storage.model.Chat;
@@ -11,10 +11,6 @@ import java.time.Instant;
 import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.Update;
-
-import static dev.metabrix.urfu.oopbot.util.Checks.checkArgument;
 
 /**
  * Контекст обработки события нового сообщения в Telegram.
@@ -23,9 +19,7 @@ import static dev.metabrix.urfu.oopbot.util.Checks.checkArgument;
  * @author metabrix
  */
 public final class MessageUpdateContext {
-    private final @NotNull BotApplication application;
-
-    private final @NotNull Message message;
+    private final @NotNull MessageInteraction interaction;
 
     private @Nullable User cachedUser;
     private @Nullable Chat cachedChat;
@@ -34,39 +28,12 @@ public final class MessageUpdateContext {
     /**
      * Создаёт новый контекст.
      *
-     * @param application приложение бота
-     * @param update событие Telegram API
+     * @param interaction взаимодействие с ботом
      * @since 1.1.0
      * @author metabrix
      */
-    public MessageUpdateContext(@NotNull BotApplication application, @NotNull Update update) {
-        this.application = application;
-
-        Message message = update.getMessage();
-        checkArgument(message != null, "update.message cannot be null");
-        this.message = message;
-    }
-
-    /**
-     * Возвращает Telegram-пользователя, отправившего сообщение.
-     *
-     * @return Telegram-пользователь
-     * @since 1.1.0
-     * @author metabrix
-     */
-    public @NotNull org.telegram.telegrambots.meta.api.objects.User getTelegramUser() {
-        return this.message.getFrom();
-    }
-
-    /**
-     * Возвращает Telegram-чат, в котором было отправлено сообщение.
-     *
-     * @return Telegram-чат
-     * @since 1.1.0
-     * @author metabrix
-     */
-    public @NotNull org.telegram.telegrambots.meta.api.objects.Chat getTelegramChat() {
-        return this.message.getChat();
+    public MessageUpdateContext(@NotNull MessageInteraction interaction) {
+        this.interaction = interaction;
     }
 
     /**
@@ -79,18 +46,17 @@ public final class MessageUpdateContext {
     public @Nullable User getAndUpdateUserIfExists() {
         if (this.cachedUser != null) return this.cachedUser;
 
-        org.telegram.telegrambots.meta.api.objects.User telegramUser = this.getTelegramUser();
-
-        UserStorage users = this.application.getStorage().users();
-        User user = users.getByTelegramId(telegramUser.getId());
+        User user = this.interaction.getUserIfExists();
         if (user == null) return null;
 
+        org.telegram.telegrambots.meta.api.objects.User telegramUser = this.interaction.getTelegramUser();
         String newTelegramUsername = telegramUser.getUserName();
         if (Objects.equals(user.telegramUsername(), newTelegramUsername)) {
             this.cachedUser = user;
             return user;
         }
 
+        UserStorage users = this.interaction.getStorage().users();
         users.updateTelegramUsername(user.id(), newTelegramUsername);
         user = new User(
             user.id(),
@@ -112,10 +78,10 @@ public final class MessageUpdateContext {
     public @NotNull User createOrUpdateUser() {
         if (this.cachedUser != null) return this.cachedUser;
 
-        org.telegram.telegrambots.meta.api.objects.User telegramUser = this.getTelegramUser();
+        org.telegram.telegrambots.meta.api.objects.User telegramUser = this.interaction.getTelegramUser();
+        UserStorage users = this.interaction.getStorage().users();
 
-        UserStorage users = this.application.getStorage().users();
-        User user = users.getByTelegramId(telegramUser.getId());
+        User user = this.interaction.getUserIfExists();
         if (user != null) {
             String newTelegramUsername = telegramUser.getUserName();
             if (Objects.equals(user.telegramUsername(), newTelegramUsername)) {
@@ -175,10 +141,7 @@ public final class MessageUpdateContext {
     public @Nullable Chat getChatIfExists() {
         if (this.cachedChat != null) return this.cachedChat;
 
-        org.telegram.telegrambots.meta.api.objects.Chat telegramChat = this.getTelegramChat();
-
-        ChatStorage chats = this.application.getStorage().chats();
-        Chat chat = chats.getByTelegramId(telegramChat.getId());
+        Chat chat = this.interaction.getChatIfExists();
         if (chat == null) return null;
 
         this.cachedChat = chat;
@@ -195,15 +158,14 @@ public final class MessageUpdateContext {
     public @NotNull Chat createChatIfNotExists() {
         if (this.cachedChat != null) return this.cachedChat;
 
-        org.telegram.telegrambots.meta.api.objects.Chat telegramChat = this.getTelegramChat();
-
-        ChatStorage chats = this.application.getStorage().chats();
-        Chat chat = chats.getByTelegramId(telegramChat.getId());
+        Chat chat = this.getChatIfExists();
         if (chat != null) {
             this.cachedChat = chat;
             return chat;
         }
 
+        org.telegram.telegrambots.meta.api.objects.Chat telegramChat = this.interaction.getTelegramChat();
+        ChatStorage chats = this.interaction.getStorage().chats();
         try {
             chat = chats.create(telegramChat.getId(), this.createOrUpdateUser().id());
             this.cachedChat = chat;
@@ -240,7 +202,7 @@ public final class MessageUpdateContext {
         Chat chat = this.getChatIfExists();
         if (chat == null) return null;
 
-        DialogState dialogState = this.application.getStorage().dialogStates().get(user.id(), chat.id());
+        DialogState dialogState = this.interaction.getStorage().dialogStates().get(user.id(), chat.id());
         this.cachedDialogState = dialogState;
         return dialogState;
     }

@@ -48,6 +48,7 @@ public class BotApplication {
 
         this.console = new Console(this, new ConsoleHandler());
         this.bot = new TelegramBot(
+            this,
             configuration.botInfo().username(),
             configuration.botInfo().token(),
             new MainUpdateListener(this)

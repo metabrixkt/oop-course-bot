@@ -16,7 +16,7 @@ public class StartCommand implements CommandHandler {
     @Override
     public @NotNull CommandExecutionResult execute(@NotNull CommandContext ctx) {
         try {
-            ctx.getApplication().getBot().execute(SendMessage.builder()
+            ctx.getInteraction().execute(SendMessage.builder()
                 .chatId(ctx.getTelegramChat().getId())
                 .parseMode(ParseMode.MARKDOWNV2)
                 .text(

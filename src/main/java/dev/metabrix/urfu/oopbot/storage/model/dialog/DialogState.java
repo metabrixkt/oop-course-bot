@@ -1,9 +1,8 @@
 package dev.metabrix.urfu.oopbot.storage.model.dialog;
 
-import dev.metabrix.urfu.oopbot.BotApplication;
+import dev.metabrix.urfu.oopbot.interaction.MessageInteraction;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
-import org.telegram.telegrambots.meta.api.objects.Update;
 
 /**
  * Состояние диалога.
@@ -15,12 +14,11 @@ public interface DialogState {
     /**
      * Обрабатывает сообщение для этого состояния диалога.
      *
-     * @param application приложения бота
-     * @param update событие Telegram API
+     * @param interaction взаимодействие с ботом
      * @since 1.1.0
      * @author metabrix
      */
-    void handleMessage(@NotNull BotApplication application, @NotNull Update update);
+    void handleMessage(@NotNull MessageInteraction interaction);
 
     /**
      * Возвращает тип состояния диалога.

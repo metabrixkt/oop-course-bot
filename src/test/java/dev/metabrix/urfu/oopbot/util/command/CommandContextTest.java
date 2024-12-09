@@ -2,6 +2,8 @@ package dev.metabrix.urfu.oopbot.util.command;
 
 import dev.metabrix.urfu.oopbot.BotApplication;
 import dev.metabrix.urfu.oopbot.BotConfiguration;
+import dev.metabrix.urfu.oopbot.interaction.MessageInteraction;
+import dev.metabrix.urfu.oopbot.interaction.impl.MessageInteractionImpl;
 import java.util.HashMap;
 import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
@@ -17,36 +19,27 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 public class CommandContextTest {
     @Test
-    public void testApplication() {
+    public void testInteraction() {
         // Arrange
-        BotApplication expectedApplication = buildMockApplication();
-        CommandContext commandContext = new CommandContextImpl(expectedApplication, buildMockUpdate());
+        MessageInteraction expectedInteraction = buildMockMessageInteraction();
+        CommandContext commandContext = new CommandContextImpl(expectedInteraction);
 
         // Act
-        BotApplication result = commandContext.getApplication();
+        MessageInteraction result = commandContext.getInteraction();
 
         // Assert
-        assertEquals(result, expectedApplication);
-    }
-
-    @Test
-    public void testRawUpdate() {
-        // Arrange
-        Update expectedUpdate = buildMockUpdate();
-        CommandContext commandContext = new CommandContextImpl(buildMockApplication(), expectedUpdate);
-
-        // Act
-        Update result = commandContext.getRawUpdate();
-
-        // Assert
-        assertEquals(result, expectedUpdate);
+        assertEquals(result, expectedInteraction);
     }
 
     @ParameterizedTest
     @MethodSource("sourceTestCommandInput")
-    public void testCommandInput(@NotNull Update update, @NotNull String expectedInput) {
+    public void testCommandInput(@NotNull String messageText, @NotNull String expectedInput) {
         // Arrange
-        CommandContext commandContext = new CommandContextImpl(buildMockApplication(), update);
+        Update update = new Update();
+        Message message = new Message();
+        message.setText(messageText);
+        update.setMessage(message);
+        CommandContext commandContext = new CommandContextImpl(new MessageInteractionImpl(buildMockApplication(), update, Update::getMessage));
 
         // Act
         String result = commandContext.getCommandInput().getRawInput();
@@ -56,26 +49,15 @@ public class CommandContextTest {
     }
 
     private static @NotNull Stream<@NotNull Arguments> sourceTestCommandInput() {
-        Update update1 = new Update();
-        Message message1 = new Message();
-        message1.setText("spaghetti monster");
-        update1.setMessage(message1);
-
-        Update update2 = new Update();
-        Message message2 = new Message();
-        message2.setText("/spaghetti monster");
-        update2.setMessage(message2);
-
-        Update update3 = new Update();
-        Message message3 = new Message();
-        message3.setText("//spaghetti monster");
-        update3.setMessage(message3);
-
         return Stream.of(
-            arguments(update1, "spaghetti monster"),
-            arguments(update2, "spaghetti monster"),
-            arguments(update3, "/spaghetti monster")
+            arguments("spaghetti monster", "spaghetti monster"),
+            arguments("/spaghetti monster", "spaghetti monster"),
+            arguments("//spaghetti monster", "/spaghetti monster")
         );
+    }
+
+    private static @NotNull MessageInteraction buildMockMessageInteraction() {
+        return new MessageInteractionImpl(buildMockApplication(), buildMessageMockUpdate(), Update::getMessage);
     }
 
     private static @NotNull BotApplication buildMockApplication() {
@@ -86,7 +68,7 @@ public class CommandContextTest {
         ));
     }
 
-    private static @NotNull Update buildMockUpdate() {
+    private static @NotNull Update buildMessageMockUpdate() {
         Update update = new Update();
         Message message = new Message();
         message.setText("/spaghetti monster");

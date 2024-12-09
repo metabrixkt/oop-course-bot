@@ -1,6 +1,6 @@
 package dev.metabrix.urfu.oopbot.util.command;
 
-import dev.metabrix.urfu.oopbot.BotApplication;
+import dev.metabrix.urfu.oopbot.interaction.MessageInteraction;
 import dev.metabrix.urfu.oopbot.storage.DataStorage;
 import dev.metabrix.urfu.oopbot.storage.model.Chat;
 import dev.metabrix.urfu.oopbot.storage.model.User;
@@ -8,7 +8,6 @@ import java.util.NoSuchElementException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.Update;
 
 /**
  * Контекст исполнения команды.
@@ -18,13 +17,12 @@ import org.telegram.telegrambots.meta.api.objects.Update;
  */
 public interface CommandContext {
     /**
-     * Возвращает приложение бота.
+     * Возвращает взаимодействие с ботом.
      *
-     * @return приложение
-     * @since 1.0.0
+     * @since 1.1.0
      * @author metabrix
      */
-    @NotNull BotApplication getApplication();
+    @NotNull MessageInteraction getInteraction();
 
     /**
      * Возвращает хранилище данных.
@@ -34,17 +32,8 @@ public interface CommandContext {
      * @author metabrix
      */
     default @NotNull DataStorage getStorage() {
-        return this.getApplication().getStorage();
+        return this.getInteraction().getStorage();
     }
-
-    /**
-     * Возвращает объект события Telegram API.
-     *
-     * @return событие API
-     * @since 1.0.0
-     * @author metabrix
-     */
-    @NotNull Update getRawUpdate();
 
     /**
      * Возвращает сообщение, которое вызвало исполнение команды.
@@ -54,7 +43,7 @@ public interface CommandContext {
      * @author metabrix
      */
     default @NotNull Message getMessage() {
-        return this.getRawUpdate().getMessage();
+        return this.getInteraction().getMessage();
     }
 
     /**
@@ -87,8 +76,7 @@ public interface CommandContext {
      * @author metabrix
      */
     default @Nullable Chat getChatIfExists() {
-        org.telegram.telegrambots.meta.api.objects.Chat telegramChat = this.getTelegramChat();
-        return this.getStorage().chats().getByTelegramId(telegramChat.getId());
+        return this.getInteraction().getChatIfExists();
     }
 
     /**
@@ -102,9 +90,7 @@ public interface CommandContext {
      * @author metabrix
      */
     default @NotNull Chat getChat() {
-        Chat chat = this.getChatIfExists();
-        if (chat == null) throw new NoSuchElementException("Chat " + this.getTelegramChat() + " not found in data storage");
-        return chat;
+        return this.getInteraction().getChat();
     }
 
     /**
@@ -115,8 +101,7 @@ public interface CommandContext {
      * @author metabrix
      */
     default @Nullable User getSenderIfExists() {
-        org.telegram.telegrambots.meta.api.objects.User telegramUser = this.getTelegramSender();
-        return this.getStorage().users().getByTelegramId(telegramUser.getId());
+        return this.getInteraction().getUserIfExists();
     }
 
     /**
@@ -131,9 +116,7 @@ public interface CommandContext {
      * @author metabrix
      */
     default @NotNull User getSender() {
-        User user = this.getSenderIfExists();
-        if (user == null) throw new NoSuchElementException("User " + this.getTelegramSender() + " not found in data storage");
-        return user;
+        return this.getInteraction().getUser();
     }
 
     /**

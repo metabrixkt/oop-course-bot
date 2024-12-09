@@ -1,8 +1,10 @@
 package dev.metabrix.urfu.oopbot.telegram;
 
+import dev.metabrix.urfu.oopbot.interaction.CallbackQueryInteraction;
+import dev.metabrix.urfu.oopbot.interaction.Interaction;
+import dev.metabrix.urfu.oopbot.interaction.MessageInteraction;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
-import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 /**
@@ -12,43 +14,43 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
  * @author metabrix
  */
 public interface UpdateListener {
-    default void handleMessage(@NotNull Update update) throws TelegramApiException {}
+    default void handleMessage(@NotNull MessageInteraction interaction) throws TelegramApiException {}
 
-    default void handleInlineQuery(@NotNull Update update) throws TelegramApiException {}
+    default void handleInlineQuery(@NotNull Interaction interaction) throws TelegramApiException {}
 
-    default void handleChosenInlineQuery(@NotNull Update update) throws TelegramApiException {}
+    default void handleChosenInlineQuery(@NotNull Interaction interaction) throws TelegramApiException {}
 
-    default void handleCallbackQuery(@NotNull Update update) throws TelegramApiException {}
+    default void handleCallbackQuery(@NotNull CallbackQueryInteraction interaction) throws TelegramApiException {}
 
-    default void handleEditedMessage(@NotNull Update update) throws TelegramApiException {}
+    default void handleEditedMessage(@NotNull MessageInteraction interaction) throws TelegramApiException {}
 
-    default void handleChannelPost(@NotNull Update update) throws TelegramApiException {}
+    default void handleChannelPost(@NotNull MessageInteraction interaction) throws TelegramApiException {}
 
-    default void handleEditedChannelPost(@NotNull Update update) throws TelegramApiException {}
+    default void handleEditedChannelPost(@NotNull MessageInteraction interaction) throws TelegramApiException {}
 
-    default void handleShippingQuery(@NotNull Update update) throws TelegramApiException {}
+    default void handleShippingQuery(@NotNull Interaction interaction) throws TelegramApiException {}
 
-    default void handlePreCheckoutQuery(@NotNull Update update) throws TelegramApiException {}
+    default void handlePreCheckoutQuery(@NotNull Interaction interaction) throws TelegramApiException {}
 
-    default void handlePoll(@NotNull Update update) throws TelegramApiException {}
+    default void handlePoll(@NotNull Interaction interaction) throws TelegramApiException {}
 
-    default void handlePollAnswer(@NotNull Update update) throws TelegramApiException {}
+    default void handlePollAnswer(@NotNull Interaction interaction) throws TelegramApiException {}
 
-    default void handleMyChatMember(@NotNull Update update) throws TelegramApiException {}
+    default void handleMyChatMember(@NotNull Interaction interaction) throws TelegramApiException {}
 
-    default void handleChatMember(@NotNull Update update) throws TelegramApiException {}
+    default void handleChatMember(@NotNull Interaction interaction) throws TelegramApiException {}
 
-    default void handleChatJoinRequest(@NotNull Update update) throws TelegramApiException {}
-
-    @ApiStatus.Experimental
-    default void handleMessageReaction(@NotNull Update update) throws TelegramApiException {}
+    default void handleChatJoinRequest(@NotNull Interaction interaction) throws TelegramApiException {}
 
     @ApiStatus.Experimental
-    default void handleMessageReactionCount(@NotNull Update update) throws TelegramApiException {}
+    default void handleMessageReaction(@NotNull Interaction interaction) throws TelegramApiException {}
 
     @ApiStatus.Experimental
-    default void handleChatBoost(@NotNull Update update) throws TelegramApiException {}
+    default void handleMessageReactionCount(@NotNull Interaction interaction) throws TelegramApiException {}
 
     @ApiStatus.Experimental
-    default void handleRemovedChatBoost(@NotNull Update update) throws TelegramApiException {}
+    default void handleChatBoost(@NotNull Interaction interaction) throws TelegramApiException {}
+
+    @ApiStatus.Experimental
+    default void handleRemovedChatBoost(@NotNull Interaction interaction) throws TelegramApiException {}
 }

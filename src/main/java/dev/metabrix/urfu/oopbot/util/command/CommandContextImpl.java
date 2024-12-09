@@ -1,17 +1,14 @@
 package dev.metabrix.urfu.oopbot.util.command;
 
-import dev.metabrix.urfu.oopbot.BotApplication;
+import dev.metabrix.urfu.oopbot.interaction.MessageInteraction;
 import org.jetbrains.annotations.NotNull;
-import org.telegram.telegrambots.meta.api.objects.Update;
 
 public class CommandContextImpl implements CommandContext {
-    private final @NotNull BotApplication application;
-    private final @NotNull Update rawUpdate;
+    private final @NotNull MessageInteraction interaction;
     private final @NotNull CommandInput input;
 
-    public CommandContextImpl(@NotNull BotApplication application, @NotNull Update rawUpdate) {
-        this.application = application;
-        this.rawUpdate = rawUpdate;
+    public CommandContextImpl(@NotNull MessageInteraction interaction) {
+        this.interaction = interaction;
 
         String rawInput = this.getMessage().getText();
         if (rawInput.startsWith("/")) rawInput = rawInput.substring(1);
@@ -19,13 +16,8 @@ public class CommandContextImpl implements CommandContext {
     }
 
     @Override
-    public @NotNull BotApplication getApplication() {
-        return this.application;
-    }
-
-    @Override
-    public @NotNull Update getRawUpdate() {
-        return this.rawUpdate;
+    public @NotNull MessageInteraction getInteraction() {
+        return this.interaction;
     }
 
     @Override
@@ -35,6 +27,6 @@ public class CommandContextImpl implements CommandContext {
 
     @Override
     public String toString() {
-        return "CommandContextImpl{application=%s, rawUpdate=%s, input=%s}".formatted(this.getApplication(), this.getRawUpdate(), this.getCommandInput());
+        return "CommandContextImpl{interaction=%s, input=%s}".formatted(this.getInteraction(), this.getCommandInput());
     }
 }
