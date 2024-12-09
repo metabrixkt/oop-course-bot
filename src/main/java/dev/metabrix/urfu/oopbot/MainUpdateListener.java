@@ -1,6 +1,8 @@
 package dev.metabrix.urfu.oopbot;
 
+import dev.metabrix.urfu.oopbot.interaction.CallbackQueryInteraction;
 import dev.metabrix.urfu.oopbot.interaction.MessageInteraction;
+import dev.metabrix.urfu.oopbot.interaction.impl.MessageInteractionImpl;
 import dev.metabrix.urfu.oopbot.storage.model.Chat;
 import dev.metabrix.urfu.oopbot.storage.model.User;
 import dev.metabrix.urfu.oopbot.storage.model.dialog.DialogState;
@@ -13,8 +15,13 @@ import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
+import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
+import org.telegram.telegrambots.meta.api.objects.MaybeInaccessibleMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 /**
@@ -112,6 +119,45 @@ public class MainUpdateListener implements UpdateListener {
                     LOGGER.error("Failed to process command execution result", e);
                 }
             });
+    }
+
+    @Override
+    public void handleCallbackQuery(@NotNull CallbackQueryInteraction interaction) throws TelegramApiException {
+        CallbackQuery query = interaction.getQuery();
+        String callbackData = query.getData();
+        if (callbackData == null) {
+            interaction.executeAsync(AnswerCallbackQuery.builder()
+                .callbackQueryId(query.getId())
+                .build());
+            return;
+        }
+
+        MaybeInaccessibleMessage queryMessage = query.getMessage();
+        String[] parts = callbackData.split(":");
+        switch (parts[0]) {
+            case "command" -> { // format: "command:<command_line>"
+                org.telegram.telegrambots.meta.api.objects.Chat chat = new org.telegram.telegrambots.meta.api.objects.Chat();
+                chat.setId(queryMessage.getChatId());
+
+                Message message = new Message();
+                message.setFrom(interaction.getTelegramUser());
+                message.setChat(chat);
+                message.setText("/" + parts[1]);
+                interaction.getUpdate().setMessage(message);
+
+                this.handleMessage(new MessageInteractionImpl(interaction.getApplication(), interaction.getUpdate(), Update::getMessage));
+            }
+            case "delete-message" -> { // format: "delete-message"
+                interaction.executeAsync(DeleteMessage.builder()
+                    .chatId(queryMessage.getChatId())
+                    .messageId(queryMessage.getMessageId())
+                    .build());
+            }
+        }
+
+        interaction.executeAsync(AnswerCallbackQuery.builder()
+            .callbackQueryId(query.getId())
+            .build());
     }
 
     private void respondUnknownCommand(@NotNull MessageInteraction interaction) throws TelegramApiException {
