@@ -132,10 +132,11 @@ public class MySQLTaskCommentsStorage implements TaskCommentsStorage {
     public void updateContent(int id, @NotNull String content) {
         TaskComment.validateContent(content);
         try (PreparedStatement s = this.pool.getConnection().prepareStatement(
-            "UPDATE " + this.tables.tasksComments() + " SET content = ? WHERE id = ?"
+            "UPDATE " + this.tables.tasksComments() + " SET content = ?, updated_at = ? WHERE id = ?"
         )) {
             s.setString(1, content);
-            s.setInt(2, id);
+            s.setTimestamp(2, Timestamp.from(Instant.now()));
+            s.setInt(3, id);
             s.executeUpdate();
         } catch (SQLException ex) {
             throw new StorageException(ex);
