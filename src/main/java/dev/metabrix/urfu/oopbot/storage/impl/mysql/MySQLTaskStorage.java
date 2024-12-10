@@ -104,7 +104,7 @@ public class MySQLTaskStorage implements TaskStorage {
             do {
                 orderBy.append(sort.name().toLowerCase(Locale.ROOT)).append(", ");
                 sort = sort.fallback();
-            } while (sort.fallback() != null);
+            } while (sort != null);
             orderBy.delete(orderBy.length() - 2, orderBy.length());
             orderBy.append(")");
         }
