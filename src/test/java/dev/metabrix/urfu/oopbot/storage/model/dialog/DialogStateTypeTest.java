@@ -16,6 +16,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 public class DialogStateTypeTest {
     @ParameterizedTest
@@ -32,6 +33,10 @@ public class DialogStateTypeTest {
 
     private static @NotNull Stream<@NotNull Arguments> sourceTestJsonSerialization() {
         return Stream.of(
+            arguments(DialogStateType.READING_NEW_TASK_NAME, new JSONObject()),
+            arguments(DialogStateType.READING_NEW_TASK_DESCRIPTION, new JSONObject().put("task_name", "spaghetti monster")),
+            arguments(DialogStateType.READING_UPDATED_TASK_NAME, new JSONObject().put("task_id", 123)),
+            arguments(DialogStateType.READING_UPDATED_TASK_DESCRIPTION, new JSONObject().put("task_id", 123))
         );
     }
 

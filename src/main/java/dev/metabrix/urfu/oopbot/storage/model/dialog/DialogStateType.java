@@ -17,6 +17,30 @@ import org.json.JSONObject;
  * @author metabrix
  */
 public enum DialogStateType {
+    /**
+     * Чтение названия новой задачи.
+     *
+     * @since 1.1.0
+     */
+    READING_NEW_TASK_NAME(ignored -> ReadingNewTaskName.INSTANCE),
+    /**
+     * Чтение описания новой задачи.
+     *
+     * @since 1.1.0
+     */
+    READING_NEW_TASK_DESCRIPTION(ReadingNewTaskDescription::fromJson),
+    /**
+     * Чтение нового названия существующей задачи.
+     *
+     * @since 1.1.0
+     */
+    READING_UPDATED_TASK_NAME(ReadingUpdatedTaskName::fromJson),
+    /**
+     * Чтение нового описания существующей задачи.
+     *
+     * @since 1.1.0
+     */
+    READING_UPDATED_TASK_DESCRIPTION(ReadingUpdatedTaskDescription::fromJson),
     ;
 
     private static final @NotNull Map<@NotNull String, @NotNull DialogStateType> BY_ID =
