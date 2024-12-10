@@ -16,7 +16,7 @@ public interface TaskStorage {
      * Возвращает хранилище комментариев к задачам.
      *
      * @return хранилище комментариев
-     * @since 1.1.1
+     * @since 1.2.0
      * @author metabrix
      */
     @NotNull TaskCommentsStorage comments();

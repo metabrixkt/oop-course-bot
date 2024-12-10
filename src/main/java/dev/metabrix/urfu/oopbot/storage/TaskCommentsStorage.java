@@ -7,8 +7,8 @@ import org.jetbrains.annotations.Nullable;
 
 /**
  * Хранилище комментариев задач.
- * 
- * @since 1.1.1
+ *
+ * @since 1.2.0
  * @author metabrix
  */
 public interface TaskCommentsStorage {
@@ -19,7 +19,7 @@ public interface TaskCommentsStorage {
      * @param authorId внутренний ID автора комментария
      * @param content текст комментария
      * @return созданный комментарий
-     * @since 1.1.1
+     * @since 1.2.0
      * @author metabrix
      */
     @NotNull TaskComment create(
@@ -33,7 +33,7 @@ public interface TaskCommentsStorage {
      *
      * @param id внутренний ID комментария
      * @return комментарий по ID или {@code null}, если такого комментария нет
-     * @since 1.1.1
+     * @since 1.2.0
      * @author metabrix
      */
     @Nullable TaskComment getById(int id);
@@ -47,7 +47,7 @@ public interface TaskCommentsStorage {
      * @param newerFirst если {@code true}, комментарии будут сортироваться от новых к старым,
      *        иначе в обратном порядке
      * @return список комментариев к задаче по её ID
-     * @since 1.1.1
+     * @since 1.2.0
      * @author metabrix
      */
     @NotNull List<@NotNull TaskComment> getByTaskId(int taskId, int limit, int offset, boolean newerFirst);
@@ -57,7 +57,7 @@ public interface TaskCommentsStorage {
      *
      * @param taskId внутренний ID задачи
      * @return количество комментариев к задаче по её ID
-     * @since 1.1.1
+     * @since 1.2.0
      * @author metabrix
      */
     int countByTaskId(int taskId);
@@ -67,7 +67,7 @@ public interface TaskCommentsStorage {
      *
      * @param id внутренний ID комментария
      * @param content текст комментария
-     * @since 1.1.1
+     * @since 1.2.0
      * @author metabrix
      */
     void updateContent(int id, @NotNull String content);
@@ -76,8 +76,9 @@ public interface TaskCommentsStorage {
      * Удаляет комментарий по ID.
      *
      * @param id ID комментария
-     * @since 1.1.1
+     * @return {@code true}, если комментарий был удалён, или {@code false}, если такого комментария нет
+     * @since 1.2.0
      * @author metabrix
      */
-    void delete(int id);
+    boolean delete(int id);
 }

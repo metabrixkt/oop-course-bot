@@ -15,7 +15,7 @@ import static org.glassfish.jersey.internal.guava.Preconditions.checkArgument;
  * @param content текст комментария
  * @param postedAt дата-время публикации комментария
  * @param updatedAt дата-время последнего обновления комментария
- * @since 1.1.1
+ * @since 1.2.0
  * @author metabrix
  */
 public record TaskComment(
@@ -33,7 +33,7 @@ public record TaskComment(
      *
      * @param content текст комментария
      * @throws IllegalArgumentException если текст комментария некорректен
-     * @since 1.1.1
+     * @since 1.2.0
      * @author metabrix
      */
     public static void validateContent(@NotNull String content) {

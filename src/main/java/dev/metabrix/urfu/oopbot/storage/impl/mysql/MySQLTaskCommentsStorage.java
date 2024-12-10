@@ -143,12 +143,12 @@ public class MySQLTaskCommentsStorage implements TaskCommentsStorage {
     }
 
     @Override
-    public void delete(int id) {
+    public boolean delete(int id) {
         try (PreparedStatement s = this.pool.getConnection().prepareStatement(
             "DELETE FROM " + this.tables.tasksComments() + " WHERE id = ?"
         )) {
             s.setInt(1, id);
-            s.executeUpdate();
+            return s.executeUpdate() > 0;
         } catch (SQLException ex) {
             throw new StorageException(ex);
         }
