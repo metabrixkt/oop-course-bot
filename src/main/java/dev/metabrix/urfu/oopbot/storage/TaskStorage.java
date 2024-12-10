@@ -128,10 +128,11 @@ public interface TaskStorage {
      * Удаляет задачу по ID.
      *
      * @param id ID задачи
+     * @return {@code true}, если задача была удалена, или {@code false}, если такой задачи нет
      * @since 1.1.0
      * @author metabrix
      */
-    void delete(int id);
+    boolean delete(int id);
 
     /**
      * Свойство задачи для сортировки.

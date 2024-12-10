@@ -42,8 +42,10 @@ public interface DialogStateStorage {
      *
      * @param userId ID пользователя в хранилище
      * @param chatId ID чата в хранилище
+     * @return {@code true}, если состояние диалога было удалено, или {@code false}, если у пользователя
+     *         нет состояния диалога в этом чате
      * @since 1.1.0
      * @author metabrix
      */
-    void delete(int userId, int chatId);
+    boolean delete(int userId, int chatId);
 }

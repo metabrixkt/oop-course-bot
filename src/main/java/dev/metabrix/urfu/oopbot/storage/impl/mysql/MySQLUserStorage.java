@@ -116,12 +116,12 @@ public class MySQLUserStorage implements UserStorage {
     }
 
     @Override
-    public void delete(int id) {
+    public boolean delete(int id) {
         try (PreparedStatement s = this.pool.getConnection().prepareStatement(
             "DELETE FROM " + this.tables.users() + " WHERE id = ?"
         )) {
             s.setInt(1, id);
-            s.executeUpdate();
+            return s.executeUpdate() > 0;
         } catch (SQLException ex) {
             throw new StorageException(ex);
         }

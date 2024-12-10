@@ -79,13 +79,13 @@ public class MySQLDialogStateStorage implements DialogStateStorage {
     }
 
     @Override
-    public void delete(int userId, int chatId) {
+    public boolean delete(int userId, int chatId) {
         try (PreparedStatement s = this.pool.getConnection().prepareStatement(
             "DELETE FROM " + this.tables.dialogStates() + " WHERE user_id = ? AND chat_id = ?"
         )) {
             s.setInt(1, userId);
             s.setInt(2, chatId);
-            s.executeUpdate();
+            return s.executeUpdate() > 0;
         } catch (SQLException ex) {
             throw new StorageException(ex);
         }

@@ -62,8 +62,9 @@ public interface UserStorage {
      * Удаляет пользователя по ID.
      *
      * @param id ID пользователя
+     * @return {@code true}, если пользователь был удален, или {@code false}, если такого пользователя нет
      * @since 1.1.0
      * @author metabrix
      */
-    void delete(int id);
+    boolean delete(int id);
 }

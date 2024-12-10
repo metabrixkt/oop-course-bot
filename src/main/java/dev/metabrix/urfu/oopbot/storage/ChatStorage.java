@@ -49,8 +49,9 @@ public interface ChatStorage {
      * Удаляет чат по ID.
      *
      * @param id ID чата
+     * @return {@code true}, если чат был удален, или {@code false}, если такого чата нет
      * @since 1.1.0
      * @author metabrix
      */
-    void delete(int id);
+    boolean delete(int id);
 }
