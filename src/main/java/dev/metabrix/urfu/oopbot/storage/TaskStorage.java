@@ -13,6 +13,15 @@ import org.jetbrains.annotations.Nullable;
  */
 public interface TaskStorage {
     /**
+     * Возвращает хранилище комментариев к задачам.
+     *
+     * @return хранилище комментариев
+     * @since 1.2.0
+     * @author metabrix
+     */
+    @NotNull TaskCommentsStorage comments();
+
+    /**
      * Создаёт задачу.
      *
      * @param chatId внутренний ID чата задачи
