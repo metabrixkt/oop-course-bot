@@ -55,3 +55,8 @@ tasks.test {
 application {
     mainClass = "dev.metabrix.urfu.oopbot.Main"
 }
+
+arrayOf(
+    "startScripts", "distTar", "distZip",
+    "startShadowScripts", "shadowDistTar", "shadowDistZip",
+).forEach { tasks.named(it) { enabled = false } }
