@@ -3,6 +3,7 @@ package dev.metabrix.urfu.oopbot.storage.impl.mysql;
 import dev.metabrix.urfu.oopbot.storage.TaskCommentsStorage;
 import dev.metabrix.urfu.oopbot.storage.TaskStorage;
 import dev.metabrix.urfu.oopbot.storage.impl.sql.SQLConnectionPool;
+import dev.metabrix.urfu.oopbot.storage.impl.sql.SQLTables;
 import dev.metabrix.urfu.oopbot.storage.model.Task;
 import dev.metabrix.urfu.oopbot.util.exception.StorageException;
 import java.sql.PreparedStatement;
@@ -20,11 +21,11 @@ import static dev.metabrix.urfu.oopbot.util.Checks.checkState;
 
 public class MySQLTaskStorage implements TaskStorage {
     private final @NotNull SQLConnectionPool pool;
-    private final @NotNull Tables tables;
+    private final @NotNull SQLTables tables;
 
     private final @NotNull TaskCommentsStorage comments;
 
-    MySQLTaskStorage(@NotNull SQLConnectionPool pool, @NotNull Tables tables) {
+    MySQLTaskStorage(@NotNull SQLConnectionPool pool, @NotNull SQLTables tables) {
         this.pool = pool;
         this.tables = tables;
 

@@ -1,8 +1,8 @@
-package dev.metabrix.urfu.oopbot.storage.impl.mysql;
+package dev.metabrix.urfu.oopbot.storage.impl.sql;
 
 import org.jetbrains.annotations.NotNull;
 
-record Tables(
+public record SQLTables(
     @NotNull String version,
     @NotNull String users,
     @NotNull String chats,
@@ -10,7 +10,7 @@ record Tables(
     @NotNull String tasksComments,
     @NotNull String dialogStates
 ) {
-    Tables(@NotNull String tablePrefix) {
+    public SQLTables(@NotNull String tablePrefix) {
         this(
             tablePrefix + "version",
             tablePrefix + "users",

@@ -3,6 +3,7 @@ package dev.metabrix.urfu.oopbot.storage.impl.mysql;
 import dev.metabrix.urfu.oopbot.BotConfiguration;
 import dev.metabrix.urfu.oopbot.storage.*;
 import dev.metabrix.urfu.oopbot.storage.impl.sql.SQLConnectionPool;
+import dev.metabrix.urfu.oopbot.storage.impl.sql.SQLTables;
 import dev.metabrix.urfu.oopbot.util.LogUtils;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -15,7 +16,7 @@ import static dev.metabrix.urfu.oopbot.util.Checks.checkState;
 public class MySQLDataStorage implements DataStorage {
     private static final @NotNull Logger LOGGER = LogUtils.getLogger();
 
-    private final @NotNull Tables tables;
+    private final @NotNull SQLTables tables;
     private final @NotNull SQLConnectionPool pool;
 
     private final @NotNull UserStorage users;
@@ -24,7 +25,7 @@ public class MySQLDataStorage implements DataStorage {
     private final @NotNull DialogStateStorage dialogStates;
 
     public MySQLDataStorage(@NotNull BotConfiguration.DataStorage.MySQLConfiguration configuration) throws Exception {
-        this.tables = new Tables(configuration.tablePrefix());
+        this.tables = new SQLTables(configuration.tablePrefix());
         this.pool = new MySQLConnectionPool(configuration);
         this.updateSchema();
 

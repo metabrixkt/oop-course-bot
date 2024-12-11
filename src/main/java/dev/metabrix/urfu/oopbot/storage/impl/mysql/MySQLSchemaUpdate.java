@@ -1,5 +1,6 @@
 package dev.metabrix.urfu.oopbot.storage.impl.mysql;
 
+import dev.metabrix.urfu.oopbot.storage.impl.sql.SQLTables;
 import dev.metabrix.urfu.oopbot.util.LogUtils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -159,7 +160,7 @@ enum SchemaUpdate {
         this.updater = updater;
     }
 
-    public void update(@NotNull Connection connection, @NotNull Tables tables) throws Exception {
+    public void update(@NotNull Connection connection, @NotNull SQLTables tables) throws Exception {
         boolean oldAutoCommit = connection.getAutoCommit();
         try {
             connection.setAutoCommit(false);
@@ -182,7 +183,7 @@ enum SchemaUpdate {
     private interface Updater {
         void update(
             @NotNull Connection connection,
-            @NotNull Tables tables,
+            @NotNull SQLTables tables,
             @NotNull Logger logger
         ) throws SQLException;
     }

@@ -2,6 +2,7 @@ package dev.metabrix.urfu.oopbot.storage.impl.mysql;
 
 import dev.metabrix.urfu.oopbot.storage.DialogStateStorage;
 import dev.metabrix.urfu.oopbot.storage.impl.sql.SQLConnectionPool;
+import dev.metabrix.urfu.oopbot.storage.impl.sql.SQLTables;
 import dev.metabrix.urfu.oopbot.storage.model.dialog.DialogState;
 import dev.metabrix.urfu.oopbot.storage.model.dialog.DialogStateType;
 import dev.metabrix.urfu.oopbot.util.LogUtils;
@@ -19,9 +20,9 @@ public class MySQLDialogStateStorage implements DialogStateStorage {
     private static final @NotNull Logger LOGGER = LogUtils.getLogger();
 
     private final @NotNull SQLConnectionPool pool;
-    private final @NotNull Tables tables;
+    private final @NotNull SQLTables tables;
 
-    MySQLDialogStateStorage(@NotNull SQLConnectionPool pool, @NotNull Tables tables) {
+    MySQLDialogStateStorage(@NotNull SQLConnectionPool pool, @NotNull SQLTables tables) {
         this.pool = pool;
         this.tables = tables;
     }

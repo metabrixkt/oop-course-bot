@@ -2,6 +2,7 @@ package dev.metabrix.urfu.oopbot.storage.impl.mysql;
 
 import dev.metabrix.urfu.oopbot.storage.TaskCommentsStorage;
 import dev.metabrix.urfu.oopbot.storage.impl.sql.SQLConnectionPool;
+import dev.metabrix.urfu.oopbot.storage.impl.sql.SQLTables;
 import dev.metabrix.urfu.oopbot.storage.model.TaskComment;
 import dev.metabrix.urfu.oopbot.util.exception.StorageException;
 import java.sql.PreparedStatement;
@@ -16,9 +17,9 @@ import org.jetbrains.annotations.Nullable;
 
 public class MySQLTaskCommentsStorage implements TaskCommentsStorage {
     private final @NotNull SQLConnectionPool pool;
-    private final @NotNull Tables tables;
+    private final @NotNull SQLTables tables;
 
-    MySQLTaskCommentsStorage(@NotNull SQLConnectionPool pool, @NotNull Tables tables) {
+    MySQLTaskCommentsStorage(@NotNull SQLConnectionPool pool, @NotNull SQLTables tables) {
         this.pool = pool;
         this.tables = tables;
     }
