@@ -273,4 +273,54 @@ public class BotConfigurationTest {
             ), "")
         );
     }
+
+    @Test
+    public void testDataStorageSQLite() {
+        // test empty database file path
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> BotConfiguration.DataStorage.SQLiteConfiguration.fromConfig(ConfigFactory.parseString(
+                """
+                database-file-path = ""
+                table-prefix = "potato"
+                pool-size = 4
+                """
+            ), "")
+        );
+        // test no table prefix (defaults to "tt_")
+        assertDoesNotThrow(() -> BotConfiguration.DataStorage.SQLiteConfiguration.fromConfig(ConfigFactory.parseString(
+            """
+            database-file-path = "database.db"
+            pool-size = 4
+            """
+        ), ""));
+        // test no pool size (defaults to 4)
+        assertDoesNotThrow(() -> BotConfiguration.DataStorage.SQLiteConfiguration.fromConfig(ConfigFactory.parseString(
+            """
+            database-file-path = "database.db"
+            table-prefix = "potato"
+            """
+        ), ""));
+        // test invalid pool sizes
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> BotConfiguration.DataStorage.SQLiteConfiguration.fromConfig(ConfigFactory.parseString(
+                """
+                database-file-path = "database.db"
+                table-prefix = "potato"
+                pool-size = 0
+                """
+            ), "")
+        );
+        assertThrows(
+            ConfigException.WrongType.class,
+            () -> BotConfiguration.DataStorage.SQLiteConfiguration.fromConfig(ConfigFactory.parseString(
+                """
+                database-file-path = "database.db"
+                table-prefix = "potato"
+                pool-size = "potato"
+                """
+            ), "")
+        );
+    }
 }

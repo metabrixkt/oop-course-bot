@@ -4,6 +4,8 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigException;
 import com.typesafe.config.ConfigFactory;
 import dev.metabrix.urfu.oopbot.storage.impl.mysql.MySQLDataStorage;
+import dev.metabrix.urfu.oopbot.storage.impl.sqlite.SQLiteDataStorage;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.function.BiFunction;
@@ -175,6 +177,11 @@ public record BotConfiguration(
                 MySQLConfiguration::fromConfig,
                 MySQLDataStorage::new
             );
+            public static final @NotNull Type<@NotNull SQLiteDataStorage, @NotNull SQLiteConfiguration> SQLITE = new Type<>(
+                "sqlite",
+                SQLiteConfiguration::fromConfig,
+                SQLiteDataStorage::new
+            );
 
             private final @NotNull String serializedName;
             private final @NotNull BiFunction<@NotNull Config, @NotNull String, @NotNull C> configurationReader;
@@ -335,6 +342,46 @@ public record BotConfiguration(
                 checkArgument(poolSize > 0, pathPrefix + "pool-size must be greater than 0");
 
                 return new MySQLConfiguration(host, port, database, username, password, tablePrefix, poolSize);
+            }
+        }
+
+        /**
+         * Конфигурация SQLite.
+         *
+         * @param databaseFilePath путь к файлу базы данных
+         * @param tablePrefix префикс названия таблиц бота
+         * @param poolSize размер пула потоков
+         * @since 1.2.0
+         * @author metabrix
+         */
+        public record SQLiteConfiguration(
+            @NotNull Path databaseFilePath,
+            @NotNull String tablePrefix,
+            int poolSize
+        ) {
+            /**
+             * Создаёт {@link SQLiteConfiguration} из объекта {@link Config}.
+             *
+             * @param config объект {@link Config}
+             * @return {@link SQLiteConfiguration} из указанного {@link Config}
+             * @since 1.2.0
+             * @author metabrix
+             */
+            public static @NotNull SQLiteConfiguration fromConfig(@NotNull Config config, @NotNull String pathPrefix) {
+                String pathString = config.hasPath("database-file-path") ? config.getString("database-file-path") : null;
+                checkArgument(pathString != null && !pathString.isBlank(), pathPrefix + "database-file-path cannot be null or blank");
+                Path path = Path.of(pathString);
+                checkArgument(
+                    !Files.exists(path) || Files.isRegularFile(path),
+                    "File at " + pathPrefix + "database-file-path exists and is not a file"
+                );
+
+                String tablePrefix = config.hasPath("table-prefix") ? config.getString("table-prefix") : "tt_";
+
+                int poolSize = config.hasPath("pool-size") ? config.getInt("pool-size") : 4;
+                checkArgument(poolSize > 0, pathPrefix + "pool-size must be greater than 0");
+
+                return new SQLiteConfiguration(path, tablePrefix, poolSize);
             }
         }
     }
