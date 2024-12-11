@@ -52,7 +52,7 @@ public class MySQLDataStorage implements DataStorage {
             }
         }
 
-        SchemaUpdate[] updates = SchemaUpdate.values();
+        MySQLSchemaUpdate[] updates = MySQLSchemaUpdate.values();
         final int latestVersion = updates.length - 1;
         if (currentVersion > latestVersion) {
             throw new UnsupportedOperationException(
@@ -75,8 +75,9 @@ public class MySQLDataStorage implements DataStorage {
             try {
                 updates[nextVersion].update(this.pool.getConnection(), this.tables);
             } catch (Exception ex) {
+                String currentVersionString = currentVersion == -1 ? "<none>" : String.valueOf(currentVersion);
                 throw new Exception(
-                    "Unable to initialize MySQL storage, failed to update the storage schema from " + currentVersion + " to " + nextVersion,
+                    "Unable to initialize MySQL storage, failed to update the storage schema from " + currentVersionString + " to " + nextVersion,
                     ex
                 );
             }

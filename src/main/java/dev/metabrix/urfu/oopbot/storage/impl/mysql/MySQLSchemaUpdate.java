@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 
 import static dev.metabrix.urfu.oopbot.util.Checks.checkState;
 
-enum SchemaUpdate {
+enum MySQLSchemaUpdate {
     INITIAL((connection, tables, logger) -> {
         logger.info("Creating table {}", tables.version());
         try (PreparedStatement s = connection.prepareStatement(
@@ -156,7 +156,7 @@ enum SchemaUpdate {
 
     private final @NotNull Updater updater;
 
-    SchemaUpdate(@NotNull Updater updater) {
+    MySQLSchemaUpdate(@NotNull Updater updater) {
         this.updater = updater;
     }
 
