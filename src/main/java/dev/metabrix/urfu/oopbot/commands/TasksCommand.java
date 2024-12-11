@@ -25,7 +25,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
 public class TasksCommand implements FutureCommandHandler {
-    private static final int PAGE_SIZE = 5;
+    private static final int TASKS_PAGE_SIZE = 5;
     private static final @NotNull SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy 'в' HH:mm:ss");
 
     @Override
@@ -86,7 +86,7 @@ public class TasksCommand implements FutureCommandHandler {
 
     private @NotNull CompletableFuture<@NotNull CommandExecutionResult> handleList(@NotNull CommandContext ctx, int pageIndex) {
         int totalTasks = ctx.getStorage().tasks().countTasksByChatId(ctx.getChat().id());
-        int totalPages = totalTasks / PAGE_SIZE + (totalTasks % PAGE_SIZE == 0 ? 0 : 1);
+        int totalPages = totalTasks / TASKS_PAGE_SIZE + (totalTasks % TASKS_PAGE_SIZE == 0 ? 0 : 1);
 
         if (totalPages == 0) {
             return ctx.getInteraction().executeAsync(SendMessage.builder()
@@ -114,7 +114,7 @@ public class TasksCommand implements FutureCommandHandler {
 
         HashMap<Integer, User> userCache = new HashMap<>();
         List<Task> tasks = ctx.getStorage().tasks().searchTasksByChatId(
-            PAGE_SIZE, pageIndex * PAGE_SIZE,
+            TASKS_PAGE_SIZE, pageIndex * TASKS_PAGE_SIZE,
             TaskStorage.Sort.UPDATED_AT, false,
             ctx.getChat().id()
         );
