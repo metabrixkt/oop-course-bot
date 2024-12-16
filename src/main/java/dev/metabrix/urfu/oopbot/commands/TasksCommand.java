@@ -2,7 +2,9 @@ package dev.metabrix.urfu.oopbot.commands;
 
 import dev.metabrix.urfu.oopbot.storage.TaskStorage;
 import dev.metabrix.urfu.oopbot.storage.model.Task;
+import dev.metabrix.urfu.oopbot.storage.model.TaskComment;
 import dev.metabrix.urfu.oopbot.storage.model.User;
+import dev.metabrix.urfu.oopbot.storage.model.dialog.ReadingNewTaskComment;
 import dev.metabrix.urfu.oopbot.storage.model.dialog.ReadingNewTaskName;
 import dev.metabrix.urfu.oopbot.storage.model.dialog.ReadingUpdatedTaskDescription;
 import dev.metabrix.urfu.oopbot.storage.model.dialog.ReadingUpdatedTaskName;
@@ -26,6 +28,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 
 public class TasksCommand implements FutureCommandHandler {
     private static final int TASKS_PAGE_SIZE = 5;
+    private static final int COMMENTS_PAGE_SIZE = 5;
     private static final @NotNull SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy 'в' HH:mm:ss");
 
     @Override
@@ -47,6 +50,7 @@ public class TasksCommand implements FutureCommandHandler {
             case "edit-description" -> this.handleEditDescription(ctx);
             case "delete-request" -> this.handleDeleteRequest(ctx);
             case "delete-confirm" -> this.handleDeleteConfirm(ctx);
+            case "comments" -> this.handleComments(ctx);
             default -> this.handleHelp(ctx);
         };
     }
@@ -222,8 +226,16 @@ public class TasksCommand implements FutureCommandHandler {
             .parseMode(ParseMode.MARKDOWNV2)
             .text(message.toString());
 
+        InlineKeyboardMarkup.InlineKeyboardMarkupBuilder keyboard = InlineKeyboardMarkup.builder();
+        keyboard.keyboardRow(List.of(
+            InlineKeyboardButton.builder()
+                .text(Emoji.WRITING_HAND + " Комментарии")
+                .callbackData("command:tasks comments %d list".formatted(taskId))
+                .build()
+        ));
+
         if (createdBy != null) {
-            builder.replyMarkup(InlineKeyboardMarkup.builder()
+            keyboard
                 .keyboardRow(List.of(
                     InlineKeyboardButton.builder()
                         .text("Изменить название")
@@ -239,9 +251,10 @@ public class TasksCommand implements FutureCommandHandler {
                         .text("Удалить задачу")
                         .callbackData("command:tasks delete-request %d".formatted(taskId))
                         .build()
-                ))
-                .build());
+                ));
         }
+
+        builder.replyMarkup(keyboard.build());
 
         return ctx.getInteraction()
             .executeAsync(builder.build())
@@ -353,6 +366,131 @@ public class TasksCommand implements FutureCommandHandler {
         future.thenAccept(ignored -> this.handleList(ctx, 0));
 
         return future;
+    }
+
+    private @NotNull CompletableFuture<@NotNull CommandExecutionResult> handleComments(@NotNull CommandContext ctx) {
+        int taskId;
+        try {
+            taskId = ctx.getCommandInput().readInt();
+        } catch (NumberFormatException ex) {
+            return this.handleHelp(ctx);
+        }
+
+        Task task = ctx.getStorage().tasks().getById(taskId);
+        if (task == null) {
+            return ctx.getInteraction().executeAsync(SendMessage.builder()
+                .chatId(ctx.getTelegramChat().getId())
+                .parseMode(ParseMode.MARKDOWNV2)
+                .text(Emoji.X + " *Задача не найдена*")
+                .build()).thenApply(ignored -> CommandExecutionResult.SUCCESS);
+        }
+
+        return switch (ctx.getCommandInput().readToken()) {
+            case "list" -> {
+                int pageIndex = 0;
+                try {
+                    pageIndex = ctx.getCommandInput().readInt() - 1;
+                    if (pageIndex < 0) throw new IllegalArgumentException();
+                } catch (IllegalArgumentException ignored) {
+                }
+                yield this.handleCommentsList(ctx, task, pageIndex);
+            }
+            case "add" -> this.handleCommentsAdd(ctx, task);
+            // если хочешь, можешь аналогично добавить редактирование и удаление комментариев
+            default -> this.handleHelp(ctx);
+        };
+    }
+
+    private @NotNull CompletableFuture<@NotNull CommandExecutionResult> handleCommentsList(@NotNull CommandContext ctx, @NotNull Task task, int pageIndex) {
+        int totalComments = ctx.getStorage().tasks().comments().countByTaskId(task.id());
+        int totalPages = totalComments / COMMENTS_PAGE_SIZE + (totalComments % COMMENTS_PAGE_SIZE == 0 ? 0 : 1);
+
+        if (totalPages == 0) {
+            return ctx.getInteraction().executeAsync(SendMessage.builder()
+                .chatId(ctx.getTelegramChat().getId())
+                .parseMode(ParseMode.MARKDOWNV2)
+                .text("""
+                    %s *Комментариев к этой задаче пока нет*
+                    
+                    Используйте кнопку ниже, чтобы оставить первый комментарий\\.
+                    """.formatted(Emoji.PAGE_FACING_UP))
+                .replyMarkup(InlineKeyboardMarkup.builder().keyboardRow(List.of(
+                    InlineKeyboardButton.builder()
+                        .text(Emoji.WRITING_HAND + " Написать комментарий")
+                        .callbackData("command:tasks comments %d add".formatted(task.id()))
+                        .build()
+                )).build())
+                .build()).thenApply(ignored -> CommandExecutionResult.SUCCESS);
+        }
+
+        if (pageIndex >= totalPages) return this.handleCommentsList(ctx, task, 0);
+
+        StringBuilder message = new StringBuilder();
+
+        message.append("%s *Комментарии к задаче «%s»:* страница %d из %d\n".formatted(
+            Emoji.WRITING_HAND, Util.sanitizeString(task.name()), pageIndex + 1, totalPages
+        ));
+
+        HashMap<Integer, User> userCache = new HashMap<>();
+        List<TaskComment> comments = ctx.getStorage().tasks().comments().getByTaskId(task.id(), COMMENTS_PAGE_SIZE, pageIndex * COMMENTS_PAGE_SIZE, true);
+        for (TaskComment comment : comments) {
+            message.append("\n");
+
+            User createdBy = userCache.computeIfAbsent(comment.authorId(), ctx.getStorage().users()::getById);
+            message.append("*%s*, %s\n".formatted(
+                createdBy == null ? "<null>" : createdBy.markdownMention(),
+                formatInstant(comment.postedAt())
+            ));
+            if (comment.updatedAt() != null) {
+                message.append("_Последнее изменение %s от %s_\n".formatted(
+                    formatInstant(comment.updatedAt()),
+                    createdBy == null ? "<null>" : createdBy.markdownMention()
+                ));
+            }
+
+            for (String line : comment.content().split("\n")) {
+                message.append(">").append(Util.sanitizeString(line)).append("\n");
+            }
+        }
+
+        int page = pageIndex + 1;
+        List<InlineKeyboardButton> pageButtons = new ArrayList<>();
+        if (page > 1) {
+            pageButtons.add(InlineKeyboardButton.builder()
+                .text("← Страница " + (page - 1))
+                .callbackData("command:tasks comments %d list %d".formatted(task.id(), page - 1))
+                .build());
+        }
+        if (page < totalPages) {
+            pageButtons.add(InlineKeyboardButton.builder()
+                .text("Страница " + (page + 1) + " →")
+                .callbackData("command:tasks comments %d list %d".formatted(task.id(), page + 1))
+                .build());
+        }
+
+        List<InlineKeyboardButton> secondRow = List.of(
+            InlineKeyboardButton.builder()
+                .text(Emoji.WRITING_HAND + " Написать комментарий")
+                .callbackData("command:tasks comments %d add".formatted(task.id()))
+                .build()
+        );
+
+        return ctx.getInteraction().executeAsync(SendMessage.builder()
+            .chatId(ctx.getTelegramChat().getId())
+            .parseMode(ParseMode.MARKDOWNV2)
+            .text(message.toString())
+            .replyMarkup(InlineKeyboardMarkup.builder().keyboardRow(pageButtons).keyboardRow(secondRow).build())
+            .build()).thenApply(ignored -> CommandExecutionResult.SUCCESS);
+    }
+
+    private @NotNull CompletableFuture<@NotNull CommandExecutionResult> handleCommentsAdd(@NotNull CommandContext ctx, @NotNull Task task) {
+        ctx.getStorage().dialogStates().set(task.createdById(), task.chatId(), new ReadingNewTaskComment(task.id()));
+
+        return ctx.getInteraction().executeAsync(SendMessage.builder()
+            .chatId(ctx.getTelegramChat().getId())
+            .parseMode(ParseMode.MARKDOWNV2)
+            .text(Emoji.WRITING_HAND + " Напишите комментарий к задаче")
+            .build()).thenApply(ignored -> CommandExecutionResult.SUCCESS);
     }
 
     private @NotNull String formatInstant(@NotNull Instant instant) {

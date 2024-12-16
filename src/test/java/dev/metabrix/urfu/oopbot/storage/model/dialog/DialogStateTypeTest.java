@@ -36,7 +36,8 @@ public class DialogStateTypeTest {
             arguments(DialogStateType.READING_NEW_TASK_NAME, new JSONObject()),
             arguments(DialogStateType.READING_NEW_TASK_DESCRIPTION, new JSONObject().put("task_name", "spaghetti monster")),
             arguments(DialogStateType.READING_UPDATED_TASK_NAME, new JSONObject().put("task_id", 123)),
-            arguments(DialogStateType.READING_UPDATED_TASK_DESCRIPTION, new JSONObject().put("task_id", 123))
+            arguments(DialogStateType.READING_UPDATED_TASK_DESCRIPTION, new JSONObject().put("task_id", 123)),
+            arguments(DialogStateType.READING_NEW_TASK_COMMENT, new JSONObject().put("task_id", 123))
         );
     }
 

@@ -41,6 +41,12 @@ public enum DialogStateType {
      * @since 1.1.0
      */
     READING_UPDATED_TASK_DESCRIPTION(ReadingUpdatedTaskDescription::fromJson),
+    /**
+     * Чтение текста нового комментарий к задаче.
+     *
+     * @since 1.2.0
+     */
+    READING_NEW_TASK_COMMENT(ReadingNewTaskComment::fromJson),
     ;
 
     private static final @NotNull Map<@NotNull String, @NotNull DialogStateType> BY_ID =
